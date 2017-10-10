@@ -27,6 +27,10 @@ scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
  * Dependencies
  */
 libraryDependencies ++= Seq(
+  "io.frees" %% "freestyle" % "0.3.1",
+  "io.frees" %% "freestyle-async-monix" % "0.3.1",
+  "io.frees" %% "freestyle-config" % "0.3.1",
+  "io.frees" %% "freestyle-logging" % "0.3.1",
   // Configuration
   "com.typesafe" % "config" % "1.3.1",
   // Concurrency
@@ -34,8 +38,8 @@ libraryDependencies ++= Seq(
   // gRPC and Protocol Buffers
   "io.grpc" % "grpc-netty" % "1.6.1",
   "io.grpc" % "grpc-stub" % "1.6.1",
-  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.6.3",
-  "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.3" % "protobuf",
+  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.6.6",
+  "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.6" % "protobuf",
   "org.javassist" % "javassist" % "3.21.0-GA", // Improves Netty performance
   // Logging
   "org.slf4j" % "slf4j-api" % "1.7.5",
