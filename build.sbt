@@ -27,6 +27,7 @@ scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
  * Dependencies
  */
 libraryDependencies ++= Seq(
+  // Purely functional dependency injection
   "io.frees" %% "freestyle" % "0.3.1",
   "io.frees" %% "freestyle-async-monix" % "0.3.1",
   "io.frees" %% "freestyle-config" % "0.3.1",
@@ -36,6 +37,7 @@ libraryDependencies ++= Seq(
   // Database
   "org.postgresql" % "postgresql" % "9.4.1208",
   "io.getquill" %% "quill-jdbc" % "2.0.0",
+  "org.flywaydb" % "flyway-core" % "4.2.0", // Migrations
   // Concurrency
   "io.monix" %% "monix" % "2.3.0",
   // gRPC and Protocol Buffers
