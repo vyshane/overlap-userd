@@ -33,6 +33,9 @@ libraryDependencies ++= Seq(
   "io.frees" %% "freestyle-logging" % "0.3.1",
   // Configuration
   "com.typesafe" % "config" % "1.3.1",
+  // Database
+  "org.postgresql" % "postgresql" % "9.4.1208",
+  "io.getquill" %% "quill-jdbc" % "2.0.0",
   // Concurrency
   "io.monix" %% "monix" % "2.3.0",
   // gRPC and Protocol Buffers
@@ -52,7 +55,8 @@ libraryDependencies ++= Seq(
   // Testing
   "org.scalatest" %% "scalatest" % "3.0.1" % Test,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test,
-  "com.github.javafaker" % "javafaker" % "0.13" % Test
+  "com.github.javafaker" % "javafaker" % "0.13" % Test,
+  "com.h2database" % "h2" % "1.4.192" % Test
 )
 
 /*
