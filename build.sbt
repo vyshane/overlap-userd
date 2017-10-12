@@ -46,15 +46,16 @@ libraryDependencies ++= Seq(
   "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.6.6",
   "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.6" % "protobuf",
   "org.javassist" % "javassist" % "3.21.0-GA", // Improves Netty performance
+  // Metrics
+  "io.prometheus" % "simpleclient" % "0.0.26",
+  //  "io.prometheus" % "simpleclient_pushgateway" % "0.0.26",
+  "org.nanohttpd" % "nanohttpd" % "2.3.1",
   // Logging
   "org.slf4j" % "slf4j-api" % "1.7.5",
   "ch.qos.logback" % "logback-core" % "1.1.8",
   "ch.qos.logback" % "logback-classic" % "1.1.8",
-  // Metrics
-  "io.prometheus" % "simpleclient" % "0.0.26",
-//  "io.prometheus" % "simpleclient_pushgateway" % "0.0.26",
-  "org.nanohttpd" % "nanohttpd" % "2.3.1",
   // Testing
+  "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
   "org.scalatest" %% "scalatest" % "3.0.1" % Test,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test,
   "com.github.javafaker" % "javafaker" % "0.13" % Test,
