@@ -39,8 +39,8 @@ libraryDependencies ++= Seq(
   // gRPC and Protocol Buffers
   "io.grpc" % "grpc-netty" % "1.8.0",
   "io.grpc" % "grpc-stub" % "1.8.0",
-  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.6.6",
-  "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.6" % "protobuf",
+  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.6.0",
+  "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.0" % "protobuf",
   "beyondthelines" %% "grpcmonixruntime" % "0.0.1",
   "org.javassist" % "javassist" % "3.22.0-GA", // Improves Netty performance
   // Metrics
@@ -62,7 +62,7 @@ libraryDependencies ++= Seq(
  * Protobuf/gRPC code generation
  */
 PB.targets in Compile := Seq(
-  scalapb.gen(grpc = true, flatPackage = true) -> (sourceManaged in Compile).value,
+  scalapb.gen(grpc = true, flatPackage = false) -> (sourceManaged in Compile).value,
   grpcmonix.generators.GrpcMonixGenerator -> (sourceManaged in Compile).value
 )
 
