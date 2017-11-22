@@ -5,7 +5,8 @@ package zone.overlap.userd
 import java.time.Instant
 
 import io.getquill.context.jdbc.JdbcContext
-import io.getquill.{H2JdbcContext, PostgresJdbcContext, SnakeCase}
+import io.getquill.context.sql.idiom.SqlIdiom
+import io.getquill._
 
 case class UserRecord(
   id: String,
@@ -16,7 +17,7 @@ case class UserRecord(
   created: Instant
 )
 
-case class UserRepository(context: JdbcContext[_, _]) {
+case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](context: JdbcContext[Dialect, Naming]) {
   import context._
 
   val users = quote {
