@@ -3,13 +3,11 @@
 package zone.overlap.api.`private`
 
 import zone.overlap.api.`private`.user._
+import zone.overlap.userd.persistence.UserRepository
 
-/**
-  * @author shane.xie
-  */
-class UserService extends UserGrpcMonix.UserService {
+class UserService(userRepository: UserRepository[_, _]) extends UserGrpcMonix.UserService {
 
-  override def findUserById(request: FindUserByIdRequest) = ???
+  override def findUserById(request: FindUserByIdRequest) = Endpoints.findUserById(userRepository.findUserById)(request)
 
   override def findUsers(request: FindUsersRequest) = ???
 
