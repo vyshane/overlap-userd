@@ -55,7 +55,9 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.4" % Test,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test,
   "com.github.javafaker" % "javafaker" % "0.14" % Test,
-  "com.h2database" % "h2" % "1.4.196" % Test
+  "com.h2database" % "h2" % "1.4.196" % Test,
+  // Misc
+  "com.github.dwickern" %% "scala-nameof" % "1.0.3" % "provided"
 )
 
 /*
