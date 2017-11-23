@@ -14,7 +14,7 @@ case class UserRecord(
   lastName: String,
   email: String,
   passwordHash: String,
-  created: Instant
+  signedUp: Instant
 )
 
 case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy]

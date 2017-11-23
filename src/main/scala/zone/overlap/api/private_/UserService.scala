@@ -1,8 +1,8 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.api.`private`
+package zone.overlap.api.private_
 
-import zone.overlap.api.`private`.user._
+import zone.overlap.api.private_.user._
 import zone.overlap.userd.persistence.UserRepository
 
 class UserService(userRepository: UserRepository[_, _]) extends UserGrpcMonix.UserService {
