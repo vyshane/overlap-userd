@@ -14,10 +14,11 @@ package object Endpoints {
   def findUserById(queryDb: String => Option[UserRecord])(request: FindUserByIdRequest): Task[FindUserByIdResponse] = {
     if (request.userId.isEmpty)
       Task.raiseError(new IllegalArgumentException("User ID is required"))
-    Task {
-      val user = queryDb(request.userId).map(userRecordToProto(_))
-      FindUserByIdResponse(user)
-    }
+    else
+      Task {
+        val user = queryDb(request.userId).map(userRecordToProto(_))
+        FindUserByIdResponse(user)
+      }
   }
 
   private def userRecordToProto(record: UserRecord): User = {
