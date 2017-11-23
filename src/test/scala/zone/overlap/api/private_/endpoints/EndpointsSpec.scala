@@ -6,7 +6,6 @@ import java.time.Instant
 import java.util.UUID
 
 import com.github.javafaker.Faker
-import monix.eval.Task
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
 import zone.overlap.api.private_.Endpoints._
 import zone.overlap.api.private_.user.{FindUserByIdRequest, User}
@@ -22,6 +21,7 @@ class EndpointsSpec extends AsyncWordSpec with Matchers with RecoverMethods {
     "sent a request with no user id" should {
       "raise an error" in {
         recoverToExceptionIf[IllegalArgumentException] {
+          // FIXME: Why is the task not raising the expected error?
           findUserById(_ => Option.empty)(FindUserByIdRequest.defaultInstance).runAsync
         } map { error =>
           error.getMessage shouldEqual "User ID is required"
