@@ -38,6 +38,7 @@ class EndpointsSpec extends AsyncWordSpec with Matchers with RecoverMethods {
       "return a response containing a user message that is correctly generated from the user record" in {
         val userRecord = randomUserRecord()
         def assertCorrectUserRecordConversion(record: UserRecord, proto: User) = {
+          record.id shouldEqual proto.userId
           record.firstName shouldEqual proto.firstName
           record.lastName shouldEqual proto.lastName
           record.email shouldEqual proto.email
