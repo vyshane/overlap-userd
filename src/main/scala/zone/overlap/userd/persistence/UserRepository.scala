@@ -7,19 +7,22 @@ import java.time.Instant
 import io.getquill._
 import io.getquill.context.jdbc.JdbcContext
 import io.getquill.context.sql.idiom.SqlIdiom
+import zone.overlap.api.private_.user.UserStatus
 
-case class UserRecord(
-  id: String,
-  firstName: String,
-  lastName: String,
-  email: String,
-  passwordHash: String,
-  signedUp: Instant
-)
+case class UserRecord(id: String,
+                      firstName: String,
+                      lastName: String,
+                      email: String,
+                      passwordHash: String,
+                      status: UserStatus,
+                      signedUp: Instant)
 
-case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy]
-                         (context: JdbcContext[Dialect, Naming] with Encoders with Decoders with Quotes) {
+case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
+    context: JdbcContext[Dialect, Naming] with Encoders with Decoders with Quotes) {
+
   import context._
+  implicit val userStatusEncoder = MappedEncoding[UserStatus, String](us => us.name)
+  implicit val userStatusDecoder = MappedEncoding[String, UserStatus](s => UserStatus.fromName(s).get)
 
   val users = quote {
     querySchema[UserRecord]("users")
@@ -32,4 +35,3 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy]
     context.run(q).headOption
   }
 }
-

@@ -6,6 +6,7 @@ import java.time.Instant
 
 import io.getquill.context.sql.SqlContext
 
+// Common quotes
 trait Quotes {
   this: SqlContext[_, _] =>
   implicit class TimestampQuotes(left: Instant) {

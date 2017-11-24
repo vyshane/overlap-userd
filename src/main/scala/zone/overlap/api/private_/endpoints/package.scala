@@ -3,6 +3,7 @@
 package zone.overlap.api.private_
 
 import com.google.protobuf.timestamp.Timestamp
+import io.grpc.Status
 import monix.eval.Task
 import zone.overlap.api.private_.user.{FindUserByIdRequest, FindUserByIdResponse, User, UserStatus}
 import zone.overlap.userd.persistence.UserRecord
@@ -13,7 +14,7 @@ package object Endpoints {
 
   def findUserById(queryDb: String => Option[UserRecord])(request: FindUserByIdRequest): Task[FindUserByIdResponse] = {
     if (request.userId.isEmpty)
-      Task.raiseError(new IllegalArgumentException("User ID is required"))
+      Task.raiseError(Status.INVALID_ARGUMENT.augmentDescription("User ID is required").asRuntimeException())
     else
       Task {
         val user = queryDb(request.userId).map(userRecordToProto(_))
@@ -27,7 +28,7 @@ package object Endpoints {
       record.firstName,
       record.lastName,
       record.email,
-      UserStatus.ACTIVE, // TODO
+      record.status,
       Option(Timestamp(record.signedUp.getEpochSecond, record.signedUp.getNano))
     )
   }

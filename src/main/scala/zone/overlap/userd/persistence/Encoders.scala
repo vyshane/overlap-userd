@@ -7,6 +7,7 @@ import java.util.Date
 
 import io.getquill.MappedEncoding
 
+// Common encoders
 trait Encoders {
   implicit val instantEncoder = MappedEncoding[Instant, Date](instant => Date.from(instant))
 }

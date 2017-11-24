@@ -14,6 +14,10 @@ object UserdApplication {
 
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.load()
+
+    if (config.getString("autoMigrateDatabaseOnLaunch").toLowerCase() == "yes")
+      DatabaseMigrator(config).migrate()
+
     lazy val context = new PostgresJdbcContext(SnakeCase, "database") with Encoders with Decoders with Quotes
     lazy val userRepository = UserRepository(context)
 
