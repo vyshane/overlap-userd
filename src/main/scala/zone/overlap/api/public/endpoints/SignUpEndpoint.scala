@@ -14,8 +14,8 @@ import scala.collection.mutable.ListBuffer
 
 object SignUpEndpoint {
 
-  def signUp(createUser: SignUpRequest => String, notifyUserSignedUp: UserSignedUp => Task[Unit])(
-      request: SignUpRequest): Task[SignUpResponse] = {
+  def signUp(createUser: SignUpRequest => String, notifyUserSignedUp: UserSignedUp => Task[Unit])
+            (request: SignUpRequest): Task[SignUpResponse] = {
     Task(request)
       .flatMap(ensureValidSignUpRequest(_))
       .map(createUser(_))

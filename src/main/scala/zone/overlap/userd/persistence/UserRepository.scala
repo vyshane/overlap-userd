@@ -3,6 +3,7 @@
 package zone.overlap.userd.persistence
 
 import java.time.Instant
+import java.util.UUID
 
 import com.google.protobuf.timestamp.Timestamp
 import io.getquill._
@@ -47,6 +48,27 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     context.run(q).headOption
   }
 
-  // TODO
-  def createUser(signUpRequest: SignUpRequest): String = ???
+  def createUser(signUpRequest: SignUpRequest): String = {
+    import com.github.t3hnar.bcrypt._
+    val userId = UUID.randomUUID().toString
+    saveUser(
+      UserRecord(
+        userId,
+        signUpRequest.firstName,
+        signUpRequest.lastName,
+        signUpRequest.email,
+        signUpRequest.password.bcrypt,
+        UserStatus.PENDING_EMAIL_VERIFICATION,
+        Instant.now()
+      )
+    )
+    userId
+  }
+
+  def saveUser(userRecord: UserRecord): Unit = {
+    val q = quote {
+      users.insert(lift(userRecord))
+    }
+    context.run(q)
+  }
 }

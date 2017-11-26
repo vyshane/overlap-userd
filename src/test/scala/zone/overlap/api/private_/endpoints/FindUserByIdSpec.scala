@@ -6,14 +6,12 @@ import java.time.Instant
 import java.util.UUID
 
 import com.github.javafaker.Faker
-import com.trueaccord.scalapb.{GeneratedEnum, GeneratedEnumCompanion}
 import io.grpc.StatusRuntimeException
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
 import zone.overlap.api.private_.Endpoints._
 import zone.overlap.api.private_.user.{FindUserByIdRequest, User, UserStatus}
 import zone.overlap.userd.persistence.UserRecord
-
-import scala.util.Random
+import zone.overlap.TestUtils._
 
 class FindUserByIdSpec extends AsyncWordSpec with Matchers with RecoverMethods {
 
@@ -73,9 +71,5 @@ class FindUserByIdSpec extends AsyncWordSpec with Matchers with RecoverMethods {
       randomEnum(UserStatus.enumCompanion),
       Instant.now()
     )
-  }
-
-  private def randomEnum[T <: GeneratedEnum](enumCompanion: GeneratedEnumCompanion[T]) = {
-    enumCompanion.values.iterator.drop(Random.nextInt(enumCompanion.values.size)).next()
   }
 }

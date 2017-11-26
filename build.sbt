@@ -31,10 +31,6 @@ resolvers += Resolver.bintrayRepo("cakesolutions", "maven")
 libraryDependencies ++= Seq(
   // Configuration
   "com.typesafe" % "config" % "1.3.2",
-  // Database
-  "org.postgresql" % "postgresql" % "9.4.1212",
-  "io.getquill" %% "quill-jdbc" % "2.2.0",
-  "org.flywaydb" % "flyway-core" % "4.2.0", // Migrations
   // Concurrency
   "io.monix" %% "monix" % "2.3.0",
   // gRPC and Protocol Buffers
@@ -44,6 +40,12 @@ libraryDependencies ++= Seq(
   "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.0" % "protobuf",
   "beyondthelines" %% "grpcmonixruntime" % "0.0.1",
   "org.javassist" % "javassist" % "3.22.0-GA", // Improves Netty performance
+  // Database
+  "org.postgresql" % "postgresql" % "9.4.1212",
+  "io.getquill" %% "quill-jdbc" % "2.2.0",
+  "org.flywaydb" % "flyway-core" % "4.2.0", // Migrations
+  // Hashing
+  "com.github.t3hnar" %% "scala-bcrypt" % "3.0",
   // Kafka
   "net.cakesolutions" %% "scala-kafka-client" % "0.11.0.0",
   // Metrics
