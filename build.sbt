@@ -27,6 +27,7 @@ scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
  * Dependencies
  */
 resolvers += Resolver.bintrayRepo("beyondthelines", "maven")
+resolvers += Resolver.bintrayRepo("cakesolutions", "maven")
 libraryDependencies ++= Seq(
   // Configuration
   "com.typesafe" % "config" % "1.3.2",
@@ -43,6 +44,8 @@ libraryDependencies ++= Seq(
   "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.0" % "protobuf",
   "beyondthelines" %% "grpcmonixruntime" % "0.0.1",
   "org.javassist" % "javassist" % "3.22.0-GA", // Improves Netty performance
+  // Kafka
+  "net.cakesolutions" %% "scala-kafka-client" % "0.11.0.0",
   // Metrics
   "io.prometheus" % "simpleclient" % "0.1.0",
   //  "io.prometheus" % "simpleclient_pushgateway" % "0.1.0",
