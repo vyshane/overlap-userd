@@ -5,7 +5,7 @@ package zone.overlap.userd
 import com.typesafe.config.ConfigFactory
 import io.getquill.{PostgresJdbcContext, SnakeCase}
 import io.grpc.ServerBuilder
-import zone.overlap.api.private_.{UserService => PrivateUserService}
+import zone.overlap.api.private_.PrivateUserService
 import zone.overlap.api.private_.user.{UserGrpcMonix => PrivateUserGrpcMonix}
 import zone.overlap.userd.persistence._
 

@@ -11,7 +11,7 @@ import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
 import io.grpc.util.MutableHandlerRegistry
 import monix.eval.Task
 import org.scalatest._
-import zone.overlap.api.private_.{UserService => PrivateUserService}
+import zone.overlap.api.private_.PrivateUserService
 import zone.overlap.api.private_.user.{FindUserByIdRequest, UserGrpcMonix => PrivateUserGrpcMonix}
 import zone.overlap.userd.persistence.{Decoders, Encoders, Quotes, UserRepository}
 
