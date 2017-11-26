@@ -4,10 +4,12 @@ package zone.overlap.userd.persistence
 
 import java.time.Instant
 
+import com.google.protobuf.timestamp.Timestamp
 import io.getquill._
 import io.getquill.context.jdbc.JdbcContext
 import io.getquill.context.sql.idiom.SqlIdiom
-import zone.overlap.api.private_.user.UserStatus
+import zone.overlap.api.private_.user.{User, UserStatus}
+import zone.overlap.api.user.SignUpRequest
 
 case class UserRecord(id: String,
                       firstName: String,
@@ -15,7 +17,17 @@ case class UserRecord(id: String,
                       email: String,
                       passwordHash: String,
                       status: UserStatus,
-                      signedUp: Instant)
+                      signedUp: Instant) {
+
+  def toProtobuf = User(
+    id,
+    firstName,
+    lastName,
+    email,
+    status,
+    Option(Timestamp(signedUp.getEpochSecond, signedUp.getNano))
+  )
+}
 
 case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     context: JdbcContext[Dialect, Naming] with Encoders with Decoders with Quotes) {
@@ -34,4 +46,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     }
     context.run(q).headOption
   }
+
+  // TODO
+  def createUser(signUpRequest: SignUpRequest): String = ???
 }
