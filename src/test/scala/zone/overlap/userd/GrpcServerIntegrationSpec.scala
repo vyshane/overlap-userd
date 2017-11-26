@@ -53,7 +53,7 @@ class GrpcServerIntegrationSpec extends AsyncWordSpec with Matchers with Recover
             .doOnFinish(_ => {
               channel.shutdown()
               server.shutdownNow()
-              Task()
+              Task(())
             })
             .runAsync
         } map { error =>
