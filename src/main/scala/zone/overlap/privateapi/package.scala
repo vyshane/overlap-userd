@@ -1,10 +1,10 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.api.private_
+package zone.overlap.privateapi
 
 import io.grpc.Status
 import monix.eval.Task
-import zone.overlap.api.private_.user.{FindUserByIdRequest, FindUserByIdResponse}
+import zone.overlap.privateapi.user.{FindUserByIdRequest, FindUserByIdResponse}
 import zone.overlap.userd.persistence.UserRecord
 
 // The actual implementations for the RPC endpoints

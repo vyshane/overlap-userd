@@ -2,7 +2,7 @@
 
 package zone.overlap.api
 
-import zone.overlap.api.public.endpoints.SignUpEndpoint
+import zone.overlap.api.endpoints.SignUpEndpoint
 import zone.overlap.api.user._
 import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence.UserRepository

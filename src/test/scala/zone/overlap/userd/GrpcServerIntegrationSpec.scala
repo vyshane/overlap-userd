@@ -11,8 +11,8 @@ import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
 import io.grpc.util.MutableHandlerRegistry
 import monix.eval.Task
 import org.scalatest._
-import zone.overlap.api.private_.PrivateUserService
-import zone.overlap.api.private_.user.{FindUserByIdRequest, UserGrpcMonix => PrivateUserGrpcMonix}
+import zone.overlap.privateapi.user.{FindUserByIdRequest, UserGrpcMonix => PrivateUserGrpcMonix}
+import zone.overlap.privateapi.PrivateUserService
 import zone.overlap.userd.persistence.{Decoders, Encoders, Quotes, UserRepository}
 
 // Exercise the gRPC server, in-process only, so that we don't require

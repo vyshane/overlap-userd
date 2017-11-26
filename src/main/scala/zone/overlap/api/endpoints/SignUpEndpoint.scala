@@ -1,13 +1,13 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.api.public.endpoints
+package zone.overlap.api.endpoints
 
 import java.time.Instant
 
 import com.google.protobuf.timestamp.Timestamp
 import io.grpc.Status
 import monix.eval.Task
-import zone.overlap.api.internal.events.user.UserSignedUp
+import zone.overlap.internalapi.events.user.UserSignedUp
 import zone.overlap.api.user.{SignUpRequest, SignUpResponse}
 
 import scala.collection.mutable.ListBuffer

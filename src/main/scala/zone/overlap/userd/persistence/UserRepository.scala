@@ -9,7 +9,7 @@ import com.google.protobuf.timestamp.Timestamp
 import io.getquill._
 import io.getquill.context.jdbc.JdbcContext
 import io.getquill.context.sql.idiom.SqlIdiom
-import zone.overlap.api.private_.user.{User, UserStatus}
+import zone.overlap.privateapi.user.{User, UserStatus}
 import zone.overlap.api.user.SignUpRequest
 
 case class UserRecord(id: String,

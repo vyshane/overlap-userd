@@ -1,6 +1,6 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.api.private_.endpoints
+package zone.overlap.privateapi
 
 import java.time.Instant
 import java.util.UUID
@@ -8,8 +8,8 @@ import java.util.UUID
 import com.github.javafaker.Faker
 import io.grpc.StatusRuntimeException
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
-import zone.overlap.api.private_.Endpoints._
-import zone.overlap.api.private_.user.{FindUserByIdRequest, User, UserStatus}
+import zone.overlap.privateapi.Endpoints._
+import zone.overlap.privateapi.user.{FindUserByIdRequest, User, UserStatus}
 import zone.overlap.userd.persistence.UserRecord
 import zone.overlap.TestUtils._
 

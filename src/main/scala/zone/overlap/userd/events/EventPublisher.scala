@@ -5,7 +5,7 @@ package zone.overlap.userd.events
 import com.typesafe.config.Config
 import monix.eval.Task
 import org.slf4j.LoggerFactory
-import zone.overlap.api.internal.events.user.UserSignedUp
+import zone.overlap.internalapi.events.user.UserSignedUp
 
 case class EventPublisher(config: Config) {
 
