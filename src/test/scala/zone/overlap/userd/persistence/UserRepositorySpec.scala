@@ -38,7 +38,7 @@ class UserRepositorySpec extends WordSpec with Matchers with RecoverMethods with
       }
       "returns the user if the user exists" in {
         val user = randomUser()
-        userRepository.saveUser(user)
+        userRepository.createUser(user)
         userRepository.findUserById(user.id) shouldEqual Option(user)
       }
     }

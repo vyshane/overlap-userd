@@ -51,7 +51,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
   def createUser(signUpRequest: SignUpRequest): String = {
     import com.github.t3hnar.bcrypt._
     val userId = UUID.randomUUID().toString
-    saveUser(
+    createUser(
       UserRecord(
         userId,
         signUpRequest.firstName,
@@ -65,7 +65,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     userId
   }
 
-  def saveUser(userRecord: UserRecord): Unit = {
+  def createUser(userRecord: UserRecord): Unit = {
     val q = quote {
       users.insert(lift(userRecord))
     }
