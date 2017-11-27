@@ -38,7 +38,7 @@ libraryDependencies ++= Seq(
   "io.grpc" % "grpc-stub" % "1.8.0",
   "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.6.0",
   "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.0" % "protobuf",
-  "beyondthelines" %% "grpcmonixruntime" % "0.0.1",
+  "beyondthelines" %% "grpcmonixruntime" % "0.0.3",
   "org.javassist" % "javassist" % "3.22.0-GA", // Improves Netty performance
   // Database
   "org.postgresql" % "postgresql" % "9.4.1212",
