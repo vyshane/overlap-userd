@@ -16,7 +16,6 @@ import zone.overlap.TestUtils._
 class FindUserByIdSpec extends AsyncWordSpec with Matchers with RecoverMethods {
 
   import monix.execution.Scheduler.Implicits.global
-
   private val faker = new Faker()
 
   "The findUserById private endpoint" when {
