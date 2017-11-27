@@ -54,14 +54,14 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
 
         val createUser = mockFunction[SignUpRequest, String]
         createUser
-          .expects(where { (theRequest: SignUpRequest) =>
+          .expects(where { theRequest: SignUpRequest =>
             theRequest == signUpRequest
           })
           .returning(newUserId)
 
         val sendNotification = mockFunction[UserSignedUp, Task[Unit]]
         sendNotification
-          .expects(where { (userSignedUp: UserSignedUp) =>
+          .expects(where { userSignedUp: UserSignedUp =>
             userSignedUp.userId == newUserId &&
             userSignedUp.firstName == signUpRequest.firstName &&
             userSignedUp.lastName == signUpRequest.lastName &&
