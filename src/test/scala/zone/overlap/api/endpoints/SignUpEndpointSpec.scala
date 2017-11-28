@@ -4,7 +4,7 @@ package zone.overlap.api.endpoints
 
 import java.util.UUID
 
-import api.api.{CreatePasswordReq, CreatePasswordResp}
+import com.coreos.dex.api.api.{CreatePasswordReq, CreatePasswordResp}
 import com.github.javafaker.Faker
 import io.grpc.{Status, StatusRuntimeException}
 import monix.eval.Task

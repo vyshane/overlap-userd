@@ -2,7 +2,7 @@
 
 package zone.overlap.api
 
-import api.api.ApiGrpcMonix
+import com.coreos.dex.api.api.ApiGrpcMonix
 import monix.eval.Task
 import zone.overlap.api.endpoints.{SignUpEndpoint, UpdateInfoEndpoint}
 import zone.overlap.api.user._

@@ -4,7 +4,7 @@ package zone.overlap.api.endpoints
 
 import java.time.Instant
 
-import api.api.{CreatePasswordReq, CreatePasswordResp}
+import com.coreos.dex.api.api.{CreatePasswordReq, CreatePasswordResp, Password => DexPassword}
 import com.google.protobuf.ByteString
 import com.google.protobuf.timestamp.Timestamp
 import io.grpc.Status
@@ -102,7 +102,7 @@ object SignUpEndpoint {
     import com.github.t3hnar.bcrypt._
     CreatePasswordReq(
       Option(
-        api.api.Password(
+        DexPassword(
           email,
           ByteString.copyFromUtf8(password.bcrypt),
           email,

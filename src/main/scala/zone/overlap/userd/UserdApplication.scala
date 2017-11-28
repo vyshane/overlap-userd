@@ -2,7 +2,7 @@
 
 package zone.overlap.userd
 
-import api.api.ApiGrpcMonix
+import com.coreos.dex.api.api.ApiGrpcMonix
 import com.typesafe.config.ConfigFactory
 import io.getquill.{PostgresJdbcContext, SnakeCase}
 import io.grpc.netty.NettyServerBuilder
