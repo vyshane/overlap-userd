@@ -23,18 +23,17 @@ object UserdApplication {
     if (config.getString("autoMigrateDatabaseOnLaunch").toLowerCase() == "yes")
       DatabaseMigrator(config).migrate()
 
+    // Set up module dependencies
     lazy val context = new PostgresJdbcContext(SnakeCase, "database") with Encoders with Decoders with Quotes
     lazy val userRepository = UserRepository(context)
-
     lazy val eventPublisher = EventPublisher(config)
-
     lazy val channel = ManagedChannelBuilder
       .forAddress(config.getString("dexHost"), config.getInt("dexPort"))
       .usePlaintext(true)
       .build()
-
     lazy val dexStub = ApiGrpcMonix.stub(channel)
 
+    // Start gRPC server and block
     NettyServerBuilder
       .forPort(config.getInt("grpcServer.port"))
       .addService(
