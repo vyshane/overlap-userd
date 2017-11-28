@@ -36,9 +36,9 @@ libraryDependencies ++= Seq(
   // gRPC and Protocol Buffers
   "io.grpc" % "grpc-netty" % "1.8.0",
   "io.grpc" % "grpc-stub" % "1.8.0",
-  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.6.0",
-  "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.0" % "protobuf",
-  "beyondthelines" %% "grpcmonixruntime" % "0.0.3",
+  "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.6.7",
+  "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.7" % "protobuf",
+  "beyondthelines" %% "grpcmonixruntime" % "0.0.4",
   "org.javassist" % "javassist" % "3.22.0-GA", // Improves Netty performance
   // Database
   "org.postgresql" % "postgresql" % "9.4.1212",
@@ -51,6 +51,9 @@ libraryDependencies ++= Seq(
   // Metrics
   "io.prometheus" % "simpleclient" % "0.1.0",
   //  "io.prometheus" % "simpleclient_pushgateway" % "0.1.0",
+  // JSON Web Tokens, JSON parsing
+  "com.pauldijou" %% "jwt-core" % "0.14.1",
+  "com.typesafe.play" %% "play-json" % "2.6.7",
   // Logging
   "org.slf4j" % "slf4j-api" % "1.7.25",
   "ch.qos.logback" % "logback-core" % "1.2.3",
@@ -70,7 +73,7 @@ libraryDependencies ++= Seq(
  */
 PB.targets in Compile := Seq(
   scalapb.gen(grpc = true, flatPackage = false) -> (sourceManaged in Compile).value,
-  grpcmonix.generators.GrpcMonixGenerator -> (sourceManaged in Compile).value
+  grpcmonix.generators.GrpcMonixGenerator() -> (sourceManaged in Compile).value
 )
 
 /*

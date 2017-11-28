@@ -7,7 +7,7 @@ import org.flywaydb.core.Flyway
 
 case class DatabaseMigrator(config: Config) {
 
-  val flyway = new Flyway
+  private val flyway = new Flyway
 
   flyway.setDataSource(
     config.getString("database.dataSource.url"),

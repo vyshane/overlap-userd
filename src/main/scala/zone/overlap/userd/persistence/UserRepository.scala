@@ -10,13 +10,12 @@ import io.getquill._
 import io.getquill.context.jdbc.JdbcContext
 import io.getquill.context.sql.idiom.SqlIdiom
 import zone.overlap.privateapi.user.{User, UserStatus}
-import zone.overlap.api.user.SignUpRequest
+import zone.overlap.api.user.{SignUpRequest, UpdateInfoRequest}
 
 case class UserRecord(id: String,
                       firstName: String,
                       lastName: String,
                       email: String,
-                      passwordHash: String,
                       status: UserStatus,
                       signedUp: Instant) {
 
@@ -37,7 +36,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
   implicit val userStatusEncoder = MappedEncoding[UserStatus, String](us => us.name)
   implicit val userStatusDecoder = MappedEncoding[String, UserStatus](s => UserStatus.fromName(s).get)
 
-  val users = quote {
+  private val users = quote {
     querySchema[UserRecord]("users")
   }
 
@@ -48,8 +47,14 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     context.run(q).headOption
   }
 
+  def findUserByEmail(email: String): Option[UserRecord] = {
+    val q = quote {
+      users.filter(_.email == lift(email))
+    }
+    context.run(q).headOption
+  }
+
   def createUser(signUpRequest: SignUpRequest): String = {
-    import com.github.t3hnar.bcrypt._
     val userId = UUID.randomUUID().toString
     createUser(
       UserRecord(
@@ -57,7 +62,6 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
         signUpRequest.firstName,
         signUpRequest.lastName,
         signUpRequest.email,
-        signUpRequest.password.bcrypt,
         UserStatus.PENDING_EMAIL_VERIFICATION,
         Instant.now()
       )
@@ -70,5 +74,9 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
       users.insert(lift(userRecord))
     }
     context.run(q)
+  }
+
+  def updateUser(updateInfoRequest: UpdateInfoRequest): Unit = {
+    // TODO
   }
 }

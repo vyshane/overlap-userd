@@ -9,8 +9,8 @@ import zone.overlap.internalapi.events.user.UserSignedUp
 
 case class EventPublisher(config: Config) {
 
-  val log = LoggerFactory.getLogger(this.getClass)
-  val bootstrapServers = config.getString("kafka.bootstrapServers")
+  private val log = LoggerFactory.getLogger(this.getClass)
+  private val bootstrapServers = config.getString("kafka.bootstrapServers")
 
   // TODO
   def sendUserSignedUp(userSignedUp: UserSignedUp): Task[Unit] = {

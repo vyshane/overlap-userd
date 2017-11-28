@@ -2,11 +2,16 @@
 
 package zone.overlap.userd
 
+import api.api.ApiGrpcMonix
 import com.typesafe.config.ConfigFactory
 import io.getquill.{PostgresJdbcContext, SnakeCase}
-import io.grpc.ServerBuilder
+import io.grpc.netty.NettyServerBuilder
+import io.grpc.ManagedChannelBuilder
+import zone.overlap.api.PublicUserService
+import zone.overlap.api.user.UserGrpcMonix
 import zone.overlap.privateapi.user.{UserGrpcMonix => PrivateUserGrpcMonix}
 import zone.overlap.privateapi.PrivateUserService
+import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence._
 
 // Main entrypoint for our application
@@ -21,10 +26,28 @@ object UserdApplication {
     lazy val context = new PostgresJdbcContext(SnakeCase, "database") with Encoders with Decoders with Quotes
     lazy val userRepository = UserRepository(context)
 
-    ServerBuilder
+    lazy val eventPublisher = EventPublisher(config)
+
+    lazy val channel = ManagedChannelBuilder
+      .forAddress(config.getString("dexHost"), config.getInt("dexPort"))
+      .usePlaintext(true)
+      .build()
+
+    lazy val dexStub = ApiGrpcMonix.stub(channel)
+
+    NettyServerBuilder
       .forPort(config.getInt("grpcServer.port"))
       .addService(
-        PrivateUserGrpcMonix.bindService(new PrivateUserService(userRepository), monix.execution.Scheduler.global)
+        UserGrpcMonix.bindService(
+          new PublicUserService(userRepository, dexStub, eventPublisher),
+          monix.execution.Scheduler.global
+        )
+      )
+      .addService(
+        PrivateUserGrpcMonix.bindService(
+          new PrivateUserService(userRepository),
+          monix.execution.Scheduler.global
+        )
       )
       .build()
       .start()

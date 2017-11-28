@@ -37,9 +37,19 @@ class UserRepositorySpec extends WordSpec with Matchers with RecoverMethods with
         userRepository.findUserById(UUID.randomUUID().toString) shouldEqual Option.empty
       }
       "returns the user if the user exists" in {
-        val user = randomUser()
+        val user = randomUserRecord()
         userRepository.createUser(user)
         userRepository.findUserById(user.id) shouldEqual Option(user)
+      }
+    }
+    "a findUserByEmail method" which {
+      "returns an empty Option if the user does not exist" in {
+        userRepository.findUserByEmail(faker.internet().emailAddress()) shouldEqual Option.empty
+      }
+      "returns the user if the user exists" in {
+        val user = randomUserRecord()
+        userRepository.createUser(user)
+        userRepository.findUserByEmail(user.email) shouldEqual Option(user)
       }
     }
     "a createUser method" which {
@@ -56,29 +66,9 @@ class UserRepositorySpec extends WordSpec with Matchers with RecoverMethods with
         userRecord.firstName shouldEqual request.firstName
         userRecord.lastName shouldEqual request.lastName
         userRecord.email shouldEqual request.email
-        import com.github.t3hnar.bcrypt._
-        request.password.isBcrypted(userRecord.passwordHash) shouldBe true
         userRecord.status shouldEqual UserStatus.PENDING_EMAIL_VERIFICATION
         userRecord.signedUp.compareTo(Instant.now) < 0 shouldBe true
       }
     }
-  }
-
-  private def randomUser(): UserRecord = {
-    randomUser(faker.gameOfThrones().house())
-  }
-
-  private def randomUser(password: String): UserRecord = {
-    import com.github.t3hnar.bcrypt._
-    val firstName = faker.name().firstName()
-    UserRecord(
-      UUID.randomUUID().toString,
-      firstName,
-      faker.name().lastName(),
-      faker.internet().emailAddress(firstName.toLowerCase),
-      password.bcrypt,
-      randomEnum(UserStatus.enumCompanion),
-      Instant.now()
-    )
   }
 }

@@ -66,7 +66,6 @@ class FindUserByIdSpec extends AsyncWordSpec with Matchers with RecoverMethods {
       firstName,
       faker.name().lastName(),
       faker.internet().emailAddress(firstName),
-      faker.hashCode().toString,
       randomEnum(UserStatus.enumCompanion),
       Instant.now()
     )
