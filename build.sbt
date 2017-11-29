@@ -42,7 +42,7 @@ libraryDependencies ++= Seq(
   "org.javassist" % "javassist" % "3.22.0-GA", // Improves Netty performance
   // Database
   "org.postgresql" % "postgresql" % "9.4.1212",
-  "io.getquill" %% "quill-jdbc" % "2.2.0",
+  "io.getquill" %% "quill-jdbc" % "2.3.1",
   "org.flywaydb" % "flyway-core" % "4.2.0", // Migrations
   // Hashing
   "com.github.t3hnar" %% "scala-bcrypt" % "3.0",
