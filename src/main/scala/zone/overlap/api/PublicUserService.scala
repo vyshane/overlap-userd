@@ -2,6 +2,8 @@
 
 package zone.overlap.api
 
+import java.time.Clock
+
 import com.coreos.dex.api.api.ApiGrpcMonix
 import monix.eval.Task
 import zone.overlap.api.endpoints.{SignUpEndpoint, UpdateInfoEndpoint}
@@ -16,7 +18,8 @@ class PublicUserService(userRepository: UserRepository[_, _], dexStub: ApiGrpcMo
     SignUpEndpoint.signUp(userRepository.findUserByEmail,
                           userRepository.createUser,
                           dexStub.createPassword,
-                          eventPublisher.sendUserSignedUp)(request)
+                          eventPublisher.sendUserSignedUp,
+                          Clock.systemUTC())(request)
   }
 
   override def verifyEmail(request: VerifyEmailRequest) = ???

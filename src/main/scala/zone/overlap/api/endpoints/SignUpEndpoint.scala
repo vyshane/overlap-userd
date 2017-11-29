@@ -2,7 +2,7 @@
 
 package zone.overlap.api.endpoints
 
-import java.time.Instant
+import java.time.{Clock, Instant}
 
 import com.coreos.dex.api.api.{CreatePasswordReq, CreatePasswordResp, Password => DexPassword}
 import com.google.protobuf.ByteString
@@ -23,24 +23,18 @@ object SignUpEndpoint {
   def signUp(findUserByEmail: String => Option[UserRecord],
              createUser: SignUpRequest => String,
              createDexPassword: CreatePasswordReq => Task[CreatePasswordResp],
-             notifyUserSignedUp: UserSignedUp => Task[Unit])(request: SignUpRequest): Task[SignUpResponse] = {
+             notifyUserSignedUp: UserSignedUp => Task[Unit],
+             clock: Clock)
+            (request: SignUpRequest): Task[SignUpResponse] = {
     Task(request)
       .flatMap(ensureValidSignUpRequest(_))
       .flatMap(ensureEmailNotTaken(findUserByEmail)(_))
       .map(createUser(_))
       .flatMap(userId => addToDex(createDexPassword)(buildCreatePasswordReq(userId, request.email, request.password)))
-      .flatMap(userId => {
-        val now = Instant.now()
-        notifyUserSignedUp(
-          UserSignedUp(
-            userId,
-            request.firstName,
-            request.lastName,
-            request.email,
-            Option(Timestamp(now.getEpochSecond, now.getNano))
-          )
-        ).map(_ => SignUpResponse(userId))
-      })
+      .flatMap { userId =>
+        val userSignedUp = buildUserSignedUpMessage(clock)(userId, request)
+        notifyUserSignedUp(userSignedUp).map(_ => SignUpResponse(userId))
+      }
   }
 
   private def ensureValidSignUpRequest(request: SignUpRequest): Task[SignUpRequest] = {
@@ -109,6 +103,17 @@ object SignUpEndpoint {
           userId
         )
       )
+    )
+  }
+
+  private def buildUserSignedUpMessage(clock: Clock)(userId: String, signUpRequest: SignUpRequest): UserSignedUp = {
+    val now = Instant.now(clock)
+    UserSignedUp(
+      userId,
+      signUpRequest.firstName,
+      signUpRequest.lastName,
+      signUpRequest.email,
+      Option(Timestamp(now.getEpochSecond, now.getNano))
     )
   }
 }

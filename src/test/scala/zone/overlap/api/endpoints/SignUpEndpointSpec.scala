@@ -2,6 +2,7 @@
 
 package zone.overlap.api.endpoints
 
+import java.time.{Clock, Instant, ZoneId}
 import java.util.UUID
 
 import com.coreos.dex.api.api.{CreatePasswordReq, CreatePasswordResp}
@@ -36,7 +37,8 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
 
         recoverToExceptionIf[StatusRuntimeException] {
           SignUpEndpoint
-            .signUp(findUserByEmail, createUser, createDexPassword, sendNotification)(SignUpRequest("", "", "", "abc"))
+            .signUp(findUserByEmail, createUser, createDexPassword, sendNotification, Clock.systemUTC())(
+              SignUpRequest("", "", "", "abc"))
             .runAsync
         } map { error =>
           error.getMessage.contains("First name must be between 1 and 255 characters") shouldBe true
@@ -55,7 +57,8 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
               mockFunction[String, Option[UserRecord]],
               mockFunction[SignUpRequest, String],
               mockFunction[CreatePasswordReq, Task[CreatePasswordResp]],
-              mockFunction[UserSignedUp, Task[Unit]]
+              mockFunction[UserSignedUp, Task[Unit]],
+              Clock.systemUTC()
             )(request)
             .runAsync
         } map { error =>
@@ -76,7 +79,8 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
               findUserByEmail,
               mockFunction[SignUpRequest, String],
               mockFunction[CreatePasswordReq, Task[CreatePasswordResp]],
-              mockFunction[UserSignedUp, Task[Unit]]
+              mockFunction[UserSignedUp, Task[Unit]],
+              Clock.systemUTC()
             )(randomSignUpRequest())
             .runAsync
         } map { error =>
@@ -107,7 +111,8 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
 
         recoverToExceptionIf[StatusRuntimeException] {
           SignUpEndpoint
-            .signUp(findUserByEmail, createUser, createDexPassword, sendNotification)(randomSignUpRequest())
+            .signUp(findUserByEmail, createUser, createDexPassword, sendNotification, Clock.systemUTC())(
+              randomSignUpRequest())
             .runAsync
         } map { error =>
           error.getStatus.getCode shouldEqual Status.ABORTED.getCode
@@ -143,6 +148,9 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
           })
           .returning(Task(CreatePasswordResp(false)))
 
+        val instant = Instant.now()
+        val clock = Clock.fixed(instant, ZoneId.systemDefault())
+
         val sendNotification = mockFunction[UserSignedUp, Task[Unit]]
         sendNotification
           .expects(where { userSignedUp: UserSignedUp =>
@@ -150,12 +158,13 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
             userSignedUp.firstName == signUpRequest.firstName &&
             userSignedUp.lastName == signUpRequest.lastName &&
             userSignedUp.email == signUpRequest.email &&
-            userSignedUp.signedUp.isDefined
+            userSignedUp.signedUp.get.seconds == instant.getEpochSecond
+            userSignedUp.signedUp.get.nanos == instant.getNano
           })
           .returning(Task(()))
 
         SignUpEndpoint
-          .signUp(findUserByEmail, createUser, createDexPassword, sendNotification)(signUpRequest)
+          .signUp(findUserByEmail, createUser, createDexPassword, sendNotification, clock)(signUpRequest)
           .runAsync
           .map { response =>
             response.userId shouldEqual newUserId
