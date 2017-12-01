@@ -16,8 +16,12 @@ import io.grpc._
 import scala.util.Try
 
 /*
- * User sessions are propagated as JSON Web Tokens through the Authorization HTTP header using the Bearer schema.
- * JWTs are signed and verified using RS256.
+ * This class is used to authenticate the user and, if valid, inject the UserContext into the gRPC call.
+ * The UserContext then becomes available in gRPC service implementations that are added to the server
+ * using the UserContextServerInterceptor.
+ *
+ * User sessions are propagated as JSON Web Tokens through the Authorization HTTP header using the Bearer
+ * schema. JWTs are signed and verified using RS256.
  *
  * The public key used to verify the JWT is provided by a JWKS endpoint configured at oicd.jwkstUrl.
  * The key is downloaded and cached.
