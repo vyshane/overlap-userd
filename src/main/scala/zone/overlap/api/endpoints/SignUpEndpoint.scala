@@ -22,15 +22,15 @@ object SignUpEndpoint {
 
   def signUp(findUserByEmail: String => Option[UserRecord],
              createUser: SignUpRequest => String,
-             createDexPassword: CreatePasswordReq => Task[CreatePasswordResp],
+             registerUserWithDex: CreatePasswordReq => Task[CreatePasswordResp],
              notifyUserSignedUp: UserSignedUp => Task[Unit],
-             clock: Clock)
-            (request: SignUpRequest): Task[SignUpResponse] = {
+             clock: Clock)(request: SignUpRequest): Task[SignUpResponse] = {
     Task(request)
       .flatMap(ensureValidSignUpRequest(_))
       .flatMap(ensureEmailNotTaken(findUserByEmail)(_))
       .map(createUser(_))
-      .flatMap(userId => addToDex(createDexPassword)(buildCreatePasswordReq(userId, request.email, request.password)))
+      .flatMap(userId =>
+        registerWithDex(registerUserWithDex)(buildCreatePasswordReq(userId, request.email, request.password)))
       .flatMap { userId =>
         val userSignedUp = buildUserSignedUpMessage(clock)(userId, request)
         notifyUserSignedUp(userSignedUp).map(_ => SignUpResponse(userId))
@@ -79,7 +79,7 @@ object SignUpEndpoint {
       .getOrElse(Task(signUpRequest))
   }
 
-  private def addToDex(createDexPassword: CreatePasswordReq => Task[CreatePasswordResp])(
+  private def registerWithDex(createDexPassword: CreatePasswordReq => Task[CreatePasswordResp])(
       request: CreatePasswordReq): Task[String] = {
     createDexPassword(request)
       .flatMap(resp => {

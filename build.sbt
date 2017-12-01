@@ -1,14 +1,11 @@
-/*
- * Project metadata
- */
+// Copyright 2017 Vy-Shane Xie Sin Fat
+
 name := "userd"
 version := sys.env.get("VERSION").getOrElse("1.0-SNAPSHOT")
 description := "Overlap User Service"
 organization := "zone.overlap"
 
-/*
- * Docker image build
- */
+// Docker image build
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
 enablePlugins(AshScriptPlugin)
@@ -17,17 +14,14 @@ dockerBaseImage := "openjdk:8-jre-alpine"
 dockerRepository := Some("asia.gcr.io/zone-overlap")
 dockerUpdateLatest := true
 
-/*
- * Compiler
- */
+// Compiler
 scalaVersion := "2.12.4"
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
-/*
- * Dependencies
- */
+// Dependencies
 resolvers += Resolver.bintrayRepo("beyondthelines", "maven")
 resolvers += Resolver.bintrayRepo("cakesolutions", "maven")
+
 libraryDependencies ++= Seq(
   // Configuration
   "com.typesafe" % "config" % "1.3.2",
@@ -48,19 +42,18 @@ libraryDependencies ++= Seq(
   "io.getquill" %% "quill-jdbc" % "2.3.1",
   "org.flywaydb" % "flyway-core" % "4.2.0", // Migrations
 
-  // Hashing
-  "com.github.t3hnar" %% "scala-bcrypt" % "3.0",
-
   // Kafka
   "net.cakesolutions" %% "scala-kafka-client" % "0.11.0.0",
 
+  // Hashing
+  "com.github.t3hnar" %% "scala-bcrypt" % "3.0",
+
+  // OpenID Connect
+  "com.nimbusds" % "oauth2-oidc-sdk" % "5.41.1",
+
   // Metrics
   "io.prometheus" % "simpleclient" % "0.1.0",
-  //  "io.prometheus" % "simpleclient_pushgateway" % "0.1.0",
-
-  // JSON Web Tokens, JSON parsing
-  "com.pauldijou" %% "jwt-core" % "0.14.1",
-  "com.typesafe.play" %% "play-json" % "2.6.7",
+//  "io.prometheus" % "simpleclient_pushgateway" % "0.1.0",
 
   // Logging
   "org.slf4j" % "slf4j-api" % "1.7.25",
@@ -84,15 +77,11 @@ libraryDependencies ++= Seq(
   "com.github.dwickern" %% "scala-nameof" % "1.0.3" % "provided"
 )
 
-/*
- * Protobuf/gRPC code generation
- */
+// Protobuf/gRPC code generation
 PB.targets in Compile := Seq(
   scalapb.gen(grpc = true, flatPackage = false) -> (sourceManaged in Compile).value,
   grpcmonix.generators.GrpcMonixGenerator() -> (sourceManaged in Compile).value
 )
 
-/*
- * Code formatting
- */
+// Code formatting
 scalafmtConfig := file(".scalafmt.conf")

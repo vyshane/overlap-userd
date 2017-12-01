@@ -2,24 +2,41 @@
 
 package zone.overlap.userd.security
 
-import java.security.PublicKey
+import java.net.URL
 import java.time.Instant
 
 import com.google.common.collect.Iterables
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jwt.JWTParser
+import com.nimbusds.oauth2.sdk.id.{ClientID, Issuer}
+import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator
+import com.typesafe.config.Config
 import io.grpc._
-import pdi.jwt.Jwt
-import pdi.jwt.JwtAlgorithm.RS256
-import play.api.libs.json.Json
 
 import scala.util.Try
 
-class UserContextServerInterceptor(jwtVerificationKey: PublicKey) extends ServerInterceptor {
+/*
+ * User sessions are propagated as JSON Web Tokens through the Authorization HTTP header using the Bearer schema.
+ * JWTs are signed and verified using RS256.
+ *
+ * The public key used to verify the JWT is provided by a JWKS endpoint configured at oicd.jwkstUrl.
+ * The key is downloaded and cached.
+ */
+class UserContextServerInterceptor(config: Config) extends ServerInterceptor {
+
+  private val validator = {
+    val issuer = new Issuer(config.getString("oicd.issuer"))
+    val clientID = new ClientID(config.getString("oicd.clientId"))
+    val jwsAlgorithm = JWSAlgorithm.RS256
+    val jwkSetUrl = new URL(config.getString("oicd.jwkstUrl"))
+    new IDTokenValidator(issuer, clientID, jwsAlgorithm, jwkSetUrl)
+  }
 
   override def interceptCall[ReqT, RespT](call: ServerCall[ReqT, RespT],
                                           headers: Metadata,
                                           next: ServerCallHandler[ReqT, RespT]): ServerCall.Listener[ReqT] = {
     readBearerToken(headers) flatMap {
-      decodeUserContext(_, jwtVerificationKey)
+      decodeUserContext(_)
     } map { userContext =>
       val withUserContext = Context
         .current()
@@ -42,13 +59,10 @@ class UserContextServerInterceptor(jwtVerificationKey: PublicKey) extends Server
     }
   }
 
-  private def decodeUserContext(jwt: String, jwtVerificationKey: PublicKey): Option[UserContext] = {
-    Jwt
-      .decode(jwt, jwtVerificationKey, Seq(RS256))
-      .flatMap(payload => Try(Json.parse(payload)))
+  private def decodeUserContext(jwt: String): Option[UserContext] = {
+    Try(validator.validate(JWTParser.parse(jwt), null))
+      .map(claims => UserContext(claims.getSubject.getValue))
       .toOption
-      .filter(json => (json \ "exp").asOpt[Long].exists(notExpired))
-      .flatMap(json => (json \ "sub").asOpt[String].map(UserContext(_)))
   }
 
   private def notExpired(expiryMillis: Long): Boolean = expiryMillis > Instant.now().toEpochMilli
