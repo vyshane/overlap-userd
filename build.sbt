@@ -77,8 +77,8 @@ libraryDependencies ++= Seq(
   "com.h2database" % "h2" % "1.4.196" % Test,
 
   // Testing - Kafka Integration
-  "net.cakesolutions" %% "scala-kafka-client-testkit" % "0.11.0.0" % Test,
-  "org.slf4j" % "log4j-over-slf4j" % "1.7.21" % Test,
+//  "net.cakesolutions" %% "scala-kafka-client-testkit" % "0.11.0.0" % Test,
+//  "org.slf4j" % "log4j-over-slf4j" % "1.7.21" % Test,
 
 // Misc
   "com.github.dwickern" %% "scala-nameof" % "1.0.3" % "provided"
