@@ -4,6 +4,9 @@ package zone.overlap.docker
 
 import com.whisk.docker.{DockerContainer, DockerKit, DockerReadyChecker}
 
+/*
+ * Provides a Dex Docker container for integration tests
+ */
 trait DockerDexService extends DockerKit {
 
   val dexContainer = DockerContainer("asia.gcr.io/zone-overlap/dex-integration:latest")
