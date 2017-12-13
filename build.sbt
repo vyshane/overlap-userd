@@ -64,6 +64,8 @@ libraryDependencies ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
   "org.scalatest" %% "scalatest" % "3.0.4" % Test,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test,
+  "com.whisk" %% "docker-testkit-scalatest" % "0.9.5" % Test,
+  "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.5" % Test,
   "com.github.javafaker" % "javafaker" % "0.14" % Test,
 
   // Testing - Database Integration
