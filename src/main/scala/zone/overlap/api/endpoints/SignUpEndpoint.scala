@@ -92,7 +92,7 @@ object SignUpEndpoint {
       })
   }
 
-  private def buildCreatePasswordReq(userId: String, email: String, password: String): CreatePasswordReq = {
+  def buildCreatePasswordReq(userId: String, email: String, password: String): CreatePasswordReq = {
     import com.github.t3hnar.bcrypt._
     CreatePasswordReq(
       Option(

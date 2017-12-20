@@ -34,7 +34,7 @@ libraryDependencies ++= Seq(
   "io.grpc" % "grpc-stub" % "1.8.0",
   "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.6.7",
   "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.7" % "protobuf",
-  "beyondthelines" %% "grpcmonixruntime" % "0.0.4",
+  "beyondthelines" %% "grpcmonixruntime" % "0.0.6",
   "org.javassist" % "javassist" % "3.22.0-GA", // Improves Netty performance
 
   // Database
@@ -66,6 +66,8 @@ libraryDependencies ++= Seq(
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test,
   "com.whisk" %% "docker-testkit-scalatest" % "0.9.5" % Test,
   "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.5" % Test,
+  "org.nanohttpd" % "nanohttpd" % "2.2.0" % Test,
+  "org.jsoup" % "jsoup" % "1.11.2" % Test,
   "com.github.javafaker" % "javafaker" % "0.14" % Test,
 
   // Testing - Database Integration
