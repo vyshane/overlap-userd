@@ -2,20 +2,25 @@
 
 package zone.overlap.docker
 
-import com.whisk.docker.{DockerContainer, DockerKit, DockerReadyChecker}
+import com.spotify.docker.client.messages.PortBinding
+import com.whisk.docker.testkit.scalatest.DockerTestKitForAll
+import com.whisk.docker.testkit.{ContainerSpec, DockerReadyChecker, ManagedContainers}
+import org.scalatest.Suite
 
 import scala.concurrent.duration._
 
 /*
  * Provides a Dex Docker container for integration tests
  */
-trait DockerDexService extends DockerKit {
+trait DockerDexService extends DockerTestKitForAll {
+  self: Suite =>
 
   val dexHttpPort = 5556
   val dexGrpcPort = 5557
 
-  val dexContainer = DockerContainer("asia.gcr.io/zone-overlap/dex-integration:latest")
-    .withPorts(dexHttpPort -> None, dexGrpcPort -> None)
+  lazy val dexContainer = ContainerSpec("asia.gcr.io/zone-overlap/dex-integration:latest")
+    .withPortBindings(dexHttpPort -> PortBinding.of("0.0.0.0", dexHttpPort),
+                      dexGrpcPort -> PortBinding.of("0.0.0.0", dexGrpcPort))
     .withReadyChecker(
       DockerReadyChecker
         .HttpResponseCode(dexHttpPort, "/dex/.well-known/openid-configuration")
@@ -24,5 +29,5 @@ trait DockerDexService extends DockerKit {
     )
     .withReadyChecker(DockerReadyChecker.LogLineContains("listening (grpc)"))
 
-  abstract override def dockerContainers = dexContainer :: super.dockerContainers
+  override val managedContainers: ManagedContainers = dexContainer.toManagedContainer
 }
