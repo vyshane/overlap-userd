@@ -65,8 +65,6 @@ class UserContextServerInterceptorIntegration
           }
         } start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
 
-        // http://127.0.0.1:5556/dex/auth?client_id=integration-test-app&scope=openid&redirect_uri=http://127.0.0.1:5555/callback&response_type=code
-
         // Start the OAuth2 flow, obtain code from Dex
         val dexAuthorizationEndpoint = s"http://$dexHost:$dexHttpPort/dex/auth?" +
           "client_id=integration-test-app&" +
@@ -80,9 +78,9 @@ class UserContextServerInterceptorIntegration
           .data("password", password)
           .post()
 
-        // Exchange code for access token
+        // TODO
 
-        // Authenticate the user and obtain an access token from Dex
+        // Exchange code for access token
 
         // Use the access token to make an RPC call
 
