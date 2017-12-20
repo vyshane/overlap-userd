@@ -23,7 +23,7 @@ web:
 # Uncomment this block to enable the gRPC API. This values MUST be different
 # from the HTTP endpoints.
 grpc:
-  addr: 127.0.0.1:5557
+  addr: 0.0.0.0:5557
 # Server certs. If TLS credentials aren't provided dex will generate self-signed ones.
 #  tlsCert: examples/grpc-client/server.crt
 #  tlsKey: examples/grpc-client/server.key
