@@ -100,7 +100,7 @@ class UserContextServerInterceptorIntegration
           val updateInfo = mockUserServiceStub.updateInfo(UpdateInfoRequest()).runAsync
           Await.result(updateInfo, 5 seconds)
         }
-        assert(error.getStatus == Status.UNAUTHENTICATED)
+        error.getStatus shouldEqual Status.UNAUTHENTICATED
       }
     }
     "intercepting an authenticated call" should {
