@@ -38,12 +38,12 @@ import zone.overlap.userd.security.{IdTokenCallCredentials, UserContextServerInt
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-/**
-  * This test launches a Dex Docker container and runs a full OAuth2 authorization code flow.
-  * We use the id token obtained from Dex to perform a gRPC call that exercises the
-  * UserContextServerInterceptor. The end-to-end test ensures that we can fetch the JSON Web
-  * Key Set from Dex and validate the id token.
-  */
+/*
+ * This test launches a Dex Docker container and runs a full OAuth2 authorization code flow.
+ * We use the id token obtained from Dex to perform a gRPC call that exercises the
+ * UserContextServerInterceptor. The end-to-end test ensures that we can fetch the JSON Web
+ * Key Set from Dex and validate the id token.
+ */
 class UserContextServerInterceptorIntegration
     extends WordSpec
     with MockFactory
@@ -55,11 +55,12 @@ class UserContextServerInterceptorIntegration
   val serverName = s"userd-test-server-${UUID.randomUUID().toString}"
   val email = faker.internet().emailAddress()
   val clientId = "integration-test-app"
+  val clientSecret = "ZXhhbXBsZS1hcHAtc2VjcmV0"
   val dexHost = "127.0.0.1"
 
-  lazy val testUserServiceChannel = InProcessChannelBuilder.forName(serverName).directExecutor().build()
+  lazy val mockUserServiceChannel = InProcessChannelBuilder.forName(serverName).directExecutor().build()
 
-  lazy val testUserServiceStub: PublicUserGrpcMonix.UserServiceStub = {
+  lazy val mockUserServiceStub: PublicUserGrpcMonix.UserServiceStub = {
     // Configure UserContextServerInterceptor to connect to Dex Docker container
     val config = ConfigFactory
       .defaultApplication()
@@ -70,8 +71,8 @@ class UserContextServerInterceptorIntegration
 
     // Start gRPC server and set up a service to perform integration test
     val serviceRegistry = new MutableHandlerRegistry()
-    val testUserService = PublicUserGrpcMonix.bindService(TestUserService(), monix.execution.Scheduler.global)
-    serviceRegistry.addService(ServerInterceptors.intercept(testUserService, userContextServerInterceptor))
+    val mockUserService = PublicUserGrpcMonix.bindService(MockUserService(), monix.execution.Scheduler.global)
+    serviceRegistry.addService(ServerInterceptors.intercept(mockUserService, userContextServerInterceptor))
     val server = InProcessServerBuilder
       .forName(serverName)
       .fallbackHandlerRegistry(serviceRegistry)
@@ -88,21 +89,22 @@ class UserContextServerInterceptorIntegration
   import monix.execution.Scheduler.Implicits.global
 
   override def afterAll() = {
-    testUserServiceChannel.shutdown()
+    mockUserServiceChannel.shutdown()
   }
 
   "UserContextServerInterceptor" when {
     "intercepting an unauthenticated call" should {
       "not provide a UserContext for the call" in {
         val error = intercept[StatusRuntimeException] {
-          val updateInfo = testUserServiceStub.updateInfo(UpdateInfoRequest()).runAsync
+          // The updateInfo endpoint requires an authenticated call
+          val updateInfo = mockUserServiceStub.updateInfo(UpdateInfoRequest()).runAsync
           Await.result(updateInfo, 5 seconds)
         }
         assert(error.getStatus == Status.UNAUTHENTICATED)
       }
     }
     "intercepting an authenticated call" should {
-      "set up the UserContext for the call" in {
+      "set up a UserContext for the call" in {
         // Setup Dex gRPC stub
         val dexChannel = ManagedChannelBuilder.forAddress(dexHost, dexGrpcPort).usePlaintext(true).build()
         val dexStub = ApiGrpcMonix.stub(dexChannel)
@@ -121,7 +123,7 @@ class UserContextServerInterceptorIntegration
         // Start of the OAuth2 flow
         val dexAuthorizationEndpoint = s"http://$dexHost:$dexHttpPort/dex/auth?" +
           s"client_id=$clientId&" +
-          "client_secret=ZXhhbXBsZS1hcHAtc2VjcmV0&" +
+          s"client_secret=$clientSecret&" +
           s"redirect_uri=http://127.0.0.1:$callbackPort/callback&" +
           "response_type=code&" +
           "scope=openid%20email%20profile%20groups"
@@ -144,7 +146,7 @@ class UserContextServerInterceptorIntegration
 
         // Submit grant access form
         // Dex will redirect us to our callback, which exchanges the authorization code for an access token
-        // The callback endpoint prints the id token and we read it using Jsoup
+        // The callback endpoint prints the id token and we parse it from the page
         val req = grantAccessPage.select("input[name=req]").first().attr("value")
         val idToken = Jsoup
           .connect(grantAccessPage.location())
@@ -158,13 +160,13 @@ class UserContextServerInterceptorIntegration
           .first()
           .text()
 
-        // Use the id token to make an RPC call to the user service
-        val updateInfo = testUserServiceStub
+        // Use the id token to make an authenticated gRPC call to the user service
+        val updateInfo = mockUserServiceStub
           .withCallCredentials(new IdTokenCallCredentials(idToken))
           .updateInfo(UpdateInfoRequest())
           .runAsync
 
-        // We should NOT get a StatusRuntimeException with code Status.UNAUTHENTICATED
+        // We do not expect a StatusRuntimeException with code Status.UNAUTHENTICATED
         noException should be thrownBy Await.result(updateInfo, 5 seconds)
 
         // Cleanup
@@ -174,10 +176,10 @@ class UserContextServerInterceptorIntegration
     }
   }
 
-  /**
-    * HTTP server that implements the OAuth authorization code callback endpoint
-    * and exchanges the authorization code for an access token using the Dex token endpoint
-    */
+  /*
+   * HTTP server that implements the OAuth authorization code callback endpoint
+   * and exchanges the authorization code for an access token using the Dex token endpoint
+   */
   case class CallbackHttpServer(callbackPort: Int, dexHost: String, dexHttpPort: Int) extends NanoHTTPD(callbackPort) {
 
     // Callback endpoint prints the id token in the body of the HTML page
@@ -198,10 +200,14 @@ class UserContextServerInterceptorIntegration
     }
   }
 
-  case class TestUserService() extends PublicUserGrpcMonix.UserService {
+  /*
+   * A mock user service implementation to verify that authenticated RPC calls have the
+   * UserContext correctly set up
+   */
+  case class MockUserService() extends PublicUserGrpcMonix.UserService {
 
     override def updateInfo(request: UpdateInfoRequest): Task[UpdateInfoResponse] = {
-      // Raise error if user context was not set up as expected
+      // Raise an error if the RPC call doesn't have access to the correct UserContext
       UserContextServerInterceptor
         .getUserContext()
         .filter(_.email == email)
