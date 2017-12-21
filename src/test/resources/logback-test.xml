@@ -14,4 +14,6 @@
     </root>
     <logger name="com.zaxxer.hikari" level="WARN"/>
     <logger name="org.flywaydb.core" level="WARN"/>
+    <logger name="com.whisk.docker.testkit" level="WARN"/>
+    <logger name="com.spotify.docker.client" level="WARN"/>
 </configuration>
