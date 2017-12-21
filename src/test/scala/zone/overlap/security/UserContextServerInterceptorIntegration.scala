@@ -152,7 +152,6 @@ class UserContextServerInterceptorIntegration
           .connect(grantAccessPage.location())
           .followRedirects(true)
           .method(Connection.Method.POST)
-          .followRedirects(true)
           .data("req", req)
           .data("approval", "approve")
           .post()
