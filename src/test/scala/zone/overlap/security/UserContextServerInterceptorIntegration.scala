@@ -18,7 +18,6 @@ import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
 import io.grpc.util.MutableHandlerRegistry
 import monix.eval.Task
 import org.jsoup.{Connection, Jsoup}
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import zone.overlap.api.endpoints.SignUpEndpoint
 import zone.overlap.docker.DockerDexService
