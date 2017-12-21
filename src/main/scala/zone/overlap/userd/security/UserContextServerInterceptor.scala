@@ -29,10 +29,10 @@ import scala.util.Try
 class UserContextServerInterceptor(config: Config) extends ServerInterceptor {
 
   private val validator = {
-    val issuer = new Issuer(config.getString("oicd.issuer"))
-    val clientID = new ClientID(config.getString("oicd.clientId"))
+    val issuer = new Issuer(config.getString("oidc.issuer"))
+    val clientID = new ClientID(config.getString("oidc.clientId"))
     val jwsAlgorithm = JWSAlgorithm.RS256
-    val jwkSetUrl = new URL(config.getString("oicd.jwkstUrl"))
+    val jwkSetUrl = new URL(config.getString("oidc.jwksUrl"))
     new IDTokenValidator(issuer, clientID, jwsAlgorithm, jwkSetUrl)
   }
 
@@ -65,7 +65,7 @@ class UserContextServerInterceptor(config: Config) extends ServerInterceptor {
 
   private def decodeUserContext(jwt: String): Option[UserContext] = {
     Try(validator.validate(JWTParser.parse(jwt), null))
-      .map(claims => UserContext(claims.getSubject.getValue))
+      .map(claims => UserContext(claims.getStringClaim("email")))
       .toOption
   }
 
@@ -74,4 +74,6 @@ class UserContextServerInterceptor(config: Config) extends ServerInterceptor {
 
 object UserContextServerInterceptor {
   val userContextKey: Context.Key[UserContext] = Context.key("user_context")
+
+  def getUserContext() = Option(userContextKey.get)
 }

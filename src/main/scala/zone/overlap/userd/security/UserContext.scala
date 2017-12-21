@@ -2,4 +2,4 @@
 
 package zone.overlap.userd.security
 
-case class UserContext(userId: String)
+case class UserContext(email: String)
