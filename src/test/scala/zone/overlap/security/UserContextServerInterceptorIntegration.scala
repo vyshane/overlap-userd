@@ -46,7 +46,6 @@ import scala.concurrent.duration._
  */
 class UserContextServerInterceptorIntegration
     extends WordSpec
-    with MockFactory
     with Matchers
     with BeforeAndAfterAll
     with DockerDexService {
