@@ -5,7 +5,7 @@ package zone.overlap.api.endpoints
 import io.grpc.Status
 import monix.eval.Task
 import zone.overlap.api.user.{UpdateInfoRequest, UpdateInfoResponse}
-import zone.overlap.userd.security.UserContextServerInterceptor
+import zone.overlap.userd.authentication.UserContextServerInterceptor
 
 object UpdateInfoEndpoint {
 
@@ -13,7 +13,7 @@ object UpdateInfoEndpoint {
     UserContextServerInterceptor.getUserContext() match {
       case Some(userContext) =>
         // TODO
-        Task(UpdateInfoResponse())
+        Task.raiseError(Status.UNIMPLEMENTED.asRuntimeException())
       case None =>
         Task.raiseError(Status.UNAUTHENTICATED.asRuntimeException())
     }

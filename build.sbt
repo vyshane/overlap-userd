@@ -51,9 +51,11 @@ libraryDependencies ++= Seq(
   // OpenID Connect
   "com.nimbusds" % "oauth2-oidc-sdk" % "5.41.1",
 
-  // Metrics
+  // Monitoring
   "io.prometheus" % "simpleclient" % "0.1.0",
+  "io.prometheus" % "simpleclient_httpserver" % "0.1.0",
 //  "io.prometheus" % "simpleclient_pushgateway" % "0.1.0",
+  "org.nanohttpd" % "nanohttpd" % "2.3.1",
 
   // Logging
   "org.slf4j" % "slf4j-api" % "1.7.25",
@@ -67,7 +69,6 @@ libraryDependencies ++= Seq(
 //  "com.whisk" %% "docker-testkit-scalatest" % "0.9.5" % Test,
   "com.whisk" %% "docker-testkit-scalatest" % "0.10.0-beta4" % Test,
   "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.6" % Test,
-  "org.nanohttpd" % "nanohttpd" % "2.2.0" % Test,
   "org.jsoup" % "jsoup" % "1.11.2" % Test,
   "com.github.javafaker" % "javafaker" % "0.14" % Test,
 

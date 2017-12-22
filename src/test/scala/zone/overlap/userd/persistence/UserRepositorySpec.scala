@@ -70,5 +70,18 @@ class UserRepositorySpec extends WordSpec with Matchers with RecoverMethods with
         userRecord.signedUp.compareTo(Instant.now) < 0 shouldBe true
       }
     }
+    "an updateUser method" which {
+      "throws an error if the user to be updated does not exist" in (pending)
+      "updates an existing user" in (pending)
+    }
+    "a canQueryDatabase method" which {
+      "returns true if we can query the users database table" in {
+        userRepository.canQueryUsers() shouldBe true
+      }
+      "returns false if we cannot query the users database table" in {
+        databaseMigrator.reset()
+        userRepository.canQueryUsers() shouldBe false
+      }
+    }
   }
 }

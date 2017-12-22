@@ -7,21 +7,31 @@ import com.typesafe.config.ConfigFactory
 import io.getquill.{PostgresJdbcContext, SnakeCase}
 import io.grpc.netty.NettyServerBuilder
 import io.grpc.{ManagedChannelBuilder, ServerInterceptors}
+import io.prometheus.client.exporter.HTTPServer
 import zone.overlap.api.PublicUserService
 import zone.overlap.api.user.UserGrpcMonix
 import zone.overlap.privateapi.user.{UserGrpcMonix => PrivateUserGrpcMonix}
 import zone.overlap.privateapi.PrivateUserService
 import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence._
-import zone.overlap.userd.security.UserContextServerInterceptor
+import zone.overlap.userd.authentication.UserContextServerInterceptor
+import zone.overlap.userd.monitoring.StatusServer
 
-// Main entrypoint for our application
+/*
+ * Main entrypoint for our application
+ */
 object UserdApplication {
 
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.load()
 
-    // Database access
+    // Start status HTTP endpoints
+    val statusServer = StatusServer(config.getInt("status.port")).startAndIndicateNotReady()
+
+    // Start serving Prometheus metrics via HTTP
+    new HTTPServer(config.getInt("metrics.port"))
+
+    // Setup database access
     if (config.getString("autoMigrateDatabaseOnLaunch").toLowerCase() == "yes")
       DatabaseMigrator(config).migrate()
     lazy val context = new PostgresJdbcContext(SnakeCase, "database") with Encoders with Decoders with Quotes
@@ -35,7 +45,7 @@ object UserdApplication {
 
     // Public user service
     lazy val channel = ManagedChannelBuilder
-      .forAddress(config.getString("dexHost"), config.getInt("dexPort"))
+      .forAddress(config.getString("dex.host"), config.getInt("dex.port"))
       .usePlaintext(true)
       .build()
     lazy val dexStub = ApiGrpcMonix.stub(channel)
@@ -50,13 +60,21 @@ object UserdApplication {
       monix.execution.Scheduler.global
     )
 
-    // Start gRPC server and block
-    NettyServerBuilder
-      .forPort(config.getInt("grpcServer.port"))
+    // Start gRPC server
+    val grpcServer = NettyServerBuilder
+      .forPort(config.getInt("grpc.port"))
       .addService(ServerInterceptors.intercept(publicUserService, userContextServerInterceptor))
       .addService(ServerInterceptors.intercept(privateUserService, userContextServerInterceptor))
       .build()
       .start()
-      .awaitTermination()
+
+    // gRPC server is up and we are ready to serve requests
+    statusServer.indicateReady()
+
+    statusServer.healthChecker = () => {
+      userRepository.canQueryUsers()
+    }
+
+    grpcServer.awaitTermination()
   }
 }

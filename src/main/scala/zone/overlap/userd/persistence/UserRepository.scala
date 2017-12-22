@@ -12,6 +12,8 @@ import io.getquill.context.sql.idiom.SqlIdiom
 import zone.overlap.privateapi.user.{User, UserStatus}
 import zone.overlap.api.user.{SignUpRequest, UpdateInfoRequest}
 
+import scala.util.{Failure, Success, Try}
+
 case class UserRecord(id: String,
                       firstName: String,
                       lastName: String,
@@ -76,7 +78,15 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     context.run(q)
   }
 
-  def updateUser(updateInfoRequest: UpdateInfoRequest): Unit = {
-    // TODO
+  def updateUser(updateInfoRequest: UpdateInfoRequest): Unit = ???  // TODO
+
+  // Simple health check. Can we query the users database table?
+  def canQueryUsers(): Boolean = {
+    Try(
+      context.run(quote(users.map(_.id))).headOption
+    ) match {
+      case Success(_) => true
+      case Failure(_) => false
+    }
   }
 }

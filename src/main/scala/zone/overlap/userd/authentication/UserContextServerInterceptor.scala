@@ -1,6 +1,6 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.userd.security
+package zone.overlap.userd.authentication
 
 import java.net.URL
 import java.time.Instant

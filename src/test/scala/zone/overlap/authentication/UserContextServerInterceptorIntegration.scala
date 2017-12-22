@@ -1,6 +1,6 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.security
+package zone.overlap.authentication
 
 import java.net.URI
 import java.util.UUID
@@ -32,7 +32,7 @@ import zone.overlap.api.user.{
   VerifyEmailRequest,
   UserGrpcMonix => PublicUserGrpcMonix
 }
-import zone.overlap.userd.security.{IdTokenCallCredentials, UserContextServerInterceptor}
+import zone.overlap.userd.authentication.{IdTokenCallCredentials, UserContextServerInterceptor}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -43,11 +43,7 @@ import scala.concurrent.duration._
  * UserContextServerInterceptor. The end-to-end test ensures that we can fetch the JSON Web
  * Key Set from Dex and validate the id token.
  */
-class UserContextServerInterceptorIntegration
-    extends WordSpec
-    with Matchers
-    with BeforeAndAfterAll
-    with DockerDexService {
+class UserContextServerInterceptorIntegration extends WordSpec with Matchers with BeforeAndAfterAll with DockerDexService {
 
   val faker = new Faker()
   val serverName = s"userd-test-server-${UUID.randomUUID().toString}"
