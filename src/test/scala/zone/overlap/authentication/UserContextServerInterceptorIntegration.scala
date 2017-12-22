@@ -39,9 +39,10 @@ import scala.concurrent.duration._
 
 /*
  * This test launches a Dex Docker container and runs a full OAuth2 authorization code flow.
- * We use the id token obtained from Dex to perform a gRPC call that exercises the
- * UserContextServerInterceptor. The end-to-end test ensures that we can fetch the JSON Web
- * Key Set from Dex and validate the id token.
+ * We use the id token obtained from Dex to perform a gRPC call that exercises adding the
+ * credentials metadata using IdTokenCallCredentials and then extracting and validating
+ * the id token using UserContextServerInterceptor. The end-to-end test also ensures that
+ * we can fetch the JSON Web Key Set from Dex.
  */
 class UserContextServerInterceptorIntegration extends WordSpec with Matchers with BeforeAndAfterAll with DockerDexService {
 
