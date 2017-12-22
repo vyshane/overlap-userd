@@ -178,7 +178,7 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
 
     // Callback endpoint prints the id token in the body of the HTML page
     override def serve(session: NanoHTTPD.IHTTPSession): Response = {
-      val code = session.getParms.get("code")
+      val code = session.getParameters.get("code").get(0)
       val codeGrant =
         new AuthorizationCodeGrant(new AuthorizationCode(code), new URI(s"http://127.0.0.1:$callbackPort/callback"))
       val clientAuth =
