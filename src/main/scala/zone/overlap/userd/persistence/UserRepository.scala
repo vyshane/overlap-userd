@@ -78,7 +78,10 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     context.run(q)
   }
 
-  def updateUser(updateInfoRequest: UpdateInfoRequest): Unit = ???  // TODO
+  def updateUser(email: String, updateInfoRequest: UpdateInfoRequest): Unit = {
+    // TODO: Implement using userId instead
+    ???
+  }
 
   // Simple health check. Can we query the users database table?
   def canQueryUsers(): Boolean = {

@@ -12,6 +12,7 @@ import com.nimbusds.oauth2.sdk.id.{ClientID, Issuer}
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator
 import com.typesafe.config.Config
 import io.grpc._
+import monix.eval.Task
 
 import scala.util.Try
 
@@ -75,5 +76,11 @@ class UserContextServerInterceptor(config: Config) extends ServerInterceptor {
 object UserContextServerInterceptor {
   val userContextKey: Context.Key[UserContext] = Context.key("user_context")
 
-  def getUserContext() = Option(userContextKey.get)
+  def getUserContext(): Option[UserContext] = Option(userContextKey.get)
+
+  def ensureAuthenticated(): Task[UserContext] = {
+    getUserContext()
+      .map(Task(_))
+      .getOrElse(Task.raiseError(Status.UNAUTHENTICATED.asRuntimeException()))
+  }
 }

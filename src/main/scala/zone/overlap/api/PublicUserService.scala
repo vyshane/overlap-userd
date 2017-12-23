@@ -8,6 +8,7 @@ import com.coreos.dex.api.api.ApiGrpcMonix
 import monix.eval.Task
 import zone.overlap.api.endpoints.{SignUpEndpoint, UpdateInfoEndpoint}
 import zone.overlap.api.user._
+import zone.overlap.userd.authentication.{UserContext, UserContextServerInterceptor}
 import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence.UserRepository
 
@@ -27,7 +28,7 @@ class PublicUserService(userRepository: UserRepository[_, _], dexStub: ApiGrpcMo
   override def resendVerificationEmail(request: ResendVerificationEmailRequest) = ???
 
   override def updateInfo(request: UpdateInfoRequest): Task[UpdateInfoResponse] = {
-    UpdateInfoEndpoint.updateInfo(userRepository.updateUser)(request)
+    UpdateInfoEndpoint.updateInfo(UserContextServerInterceptor.ensureAuthenticated, userRepository.updateUser)(request)
   }
 
   override def changePassword(request: ChangePasswordRequest) = ???
