@@ -17,12 +17,21 @@ import io.grpc.{ManagedChannelBuilder, ServerInterceptors, Status, StatusRuntime
 import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
 import io.grpc.util.MutableHandlerRegistry
 import monix.eval.Task
-import monix.reactive.Observable
 import org.jsoup.{Connection, Jsoup}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import zone.overlap.api.endpoints.SignUpEndpoint
 import zone.overlap.docker.DockerDexService
-import zone.overlap.api.user.{ChangePasswordRequest, DeleteAccountRequest, ResendVerificationEmailRequest, SignUpRequest, SignUpResponse, UpdateInfoRequest, UpdateInfoResponse, VerifyEmailRequest, UserGrpcMonix => PublicUserGrpcMonix}
+import zone.overlap.api.user.{
+  ChangePasswordRequest,
+  DeleteAccountRequest,
+  ResendVerificationEmailRequest,
+  SignUpRequest,
+  SignUpResponse,
+  UpdateInfoRequest,
+  UpdateInfoResponse,
+  VerifyEmailRequest,
+  UserGrpcMonix => PublicUserGrpcMonix
+}
 import zone.overlap.userd.authentication.{IdTokenCallCredentials, UserContextServerInterceptor}
 
 import scala.concurrent.Await
@@ -194,10 +203,10 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
     override def updateInfo(request: UpdateInfoRequest): Task[UpdateInfoResponse] = {
       UserContextServerInterceptor
         .ensureAuthenticated()
-        .flatMap(userContext =>
+        .flatMap { userContext =>
           if (userContext.email == email) Task(UpdateInfoResponse())
           else Task.raiseError(Status.UNAUTHENTICATED.asRuntimeException())
-        )
+        }
     }
 
     override def signUp(request: SignUpRequest): Task[SignUpResponse] = ???
