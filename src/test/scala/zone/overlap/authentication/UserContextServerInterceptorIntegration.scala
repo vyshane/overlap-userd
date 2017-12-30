@@ -19,7 +19,7 @@ import io.grpc.util.MutableHandlerRegistry
 import monix.eval.Task
 import org.jsoup.{Connection, Jsoup}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
-import zone.overlap.api.endpoints.SignUpEndpoint
+import zone.overlap.api.endpoints.VerifyEmailEndpoint
 import zone.overlap.docker.DockerDexService
 import zone.overlap.api.user.{
   ChangePasswordRequest,
@@ -33,6 +33,7 @@ import zone.overlap.api.user.{
   UserGrpcMonix => PublicUserGrpcMonix
 }
 import zone.overlap.userd.authentication.{IdTokenCallCredentials, UserContextServerInterceptor}
+import zone.overlap.userd.utils._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -107,7 +108,7 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
         val password = faker.lorem().word()
 
         // Register a user account with Dex
-        val request = SignUpEndpoint.buildCreatePasswordReq(userId, email, password)
+        val request = VerifyEmailEndpoint.buildCreatePasswordReq(userId, email, hashPassword(password))
         Await.result(dexStub.createPassword(request).runAsync, 5 seconds)
 
         // Start a local HTTP server to provide the callback endpoint

@@ -5,7 +5,6 @@ package zone.overlap.api.endpoints
 import java.time.{Clock, Instant, ZoneId}
 import java.util.UUID
 
-import com.coreos.dex.api.api.{CreatePasswordReq, CreatePasswordResp}
 import com.github.javafaker.Faker
 import io.grpc.{Status, StatusRuntimeException}
 import monix.eval.Task
@@ -29,16 +28,12 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
         val createUser = mockFunction[SignUpRequest, String]
         createUser.expects(*).never()
 
-        val createDexPassword = mockFunction[CreatePasswordReq, Task[CreatePasswordResp]]
-        createDexPassword.expects(*).never()
-
         val sendNotification = mockFunction[UserSignedUp, Task[Unit]]
         sendNotification.expects(*).never()
 
         recoverToExceptionIf[StatusRuntimeException] {
           SignUpEndpoint
-            .signUp(findUserByEmail, createUser, createDexPassword, sendNotification, Clock.systemUTC())(
-              SignUpRequest("", "", "", "abc"))
+            .signUp(findUserByEmail, createUser, sendNotification, Clock.systemUTC())(SignUpRequest("", "", "", "abc"))
             .runAsync
         } map { error =>
           error.getMessage.contains("First name must be between 1 and 255 characters") shouldBe true
@@ -56,7 +51,6 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
             .signUp(
               mockFunction[String, Option[UserRecord]],
               mockFunction[SignUpRequest, String],
-              mockFunction[CreatePasswordReq, Task[CreatePasswordResp]],
               mockFunction[UserSignedUp, Task[Unit]],
               Clock.systemUTC()
             )(request)
@@ -78,7 +72,6 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
             .signUp(
               findUserByEmail,
               mockFunction[SignUpRequest, String],
-              mockFunction[CreatePasswordReq, Task[CreatePasswordResp]],
               mockFunction[UserSignedUp, Task[Unit]],
               Clock.systemUTC()
             )(randomSignUpRequest())
@@ -86,37 +79,6 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
         } map { error =>
           error.getStatus.getCode shouldEqual Status.ALREADY_EXISTS.getCode
           error.getMessage.contains("Email address is already taken") shouldBe true
-        }
-      }
-    }
-    "sent a valid request but the dex password creation fails" should {
-      "raise an abort error saying that the dex password could not be created" in {
-        val findUserByEmail = mockFunction[String, Option[UserRecord]]
-        findUserByEmail
-          .expects(*)
-          .returning(Option.empty)
-
-        val createUser = mockFunction[SignUpRequest, String]
-        createUser
-          .expects(*)
-          .returning(UUID.randomUUID().toString)
-
-        val createDexPassword = mockFunction[CreatePasswordReq, Task[CreatePasswordResp]]
-        createDexPassword
-          .expects(*)
-          .returning(Task(CreatePasswordResp(true)))
-
-        val sendNotification = mockFunction[UserSignedUp, Task[Unit]]
-        sendNotification.expects(*).never()
-
-        recoverToExceptionIf[StatusRuntimeException] {
-          SignUpEndpoint
-            .signUp(findUserByEmail, createUser, createDexPassword, sendNotification, Clock.systemUTC())(
-              randomSignUpRequest())
-            .runAsync
-        } map { error =>
-          error.getStatus.getCode shouldEqual Status.ABORTED.getCode
-          error.getMessage.contains("User already exists in auth service") shouldBe true
         }
       }
     }
@@ -137,17 +99,6 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
           })
           .returning(newUserId)
 
-        val createDexPassword = mockFunction[CreatePasswordReq, Task[CreatePasswordResp]]
-        createDexPassword
-          .expects(where { theRequest: CreatePasswordReq =>
-            import com.github.t3hnar.bcrypt._
-            theRequest.password.get.email == signUpRequest.email
-            theRequest.password.get.hash.toStringUtf8 == signUpRequest.password.bcrypt
-            theRequest.password.get.username == signUpRequest.email
-            theRequest.password.get.userId == newUserId
-          })
-          .returning(Task(CreatePasswordResp(false)))
-
         val instant = Instant.now()
         val clock = Clock.fixed(instant, ZoneId.systemDefault())
 
@@ -164,7 +115,7 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
           .returning(Task(()))
 
         SignUpEndpoint
-          .signUp(findUserByEmail, createUser, createDexPassword, sendNotification, clock)(signUpRequest)
+          .signUp(findUserByEmail, createUser, sendNotification, clock)(signUpRequest)
           .runAsync
           .map { response =>
             response.userId shouldEqual newUserId

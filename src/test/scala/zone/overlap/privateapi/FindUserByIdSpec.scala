@@ -2,14 +2,13 @@
 
 package zone.overlap.privateapi
 
-import java.time.Instant
 import java.util.UUID
 
 import com.github.javafaker.Faker
 import io.grpc.StatusRuntimeException
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
 import zone.overlap.privateapi.Endpoints._
-import zone.overlap.privateapi.user.{FindUserByIdRequest, User, UserStatus}
+import zone.overlap.privateapi.user.{FindUserByIdRequest, User}
 import zone.overlap.userd.persistence.UserRecord
 import zone.overlap.TestUtils._
 
@@ -57,17 +56,5 @@ class FindUserByIdSpec extends AsyncWordSpec with Matchers with RecoverMethods {
     record.email shouldEqual protobuf.email
     record.signedUp.getEpochSecond shouldEqual protobuf.signedUp.get.seconds
     record.signedUp.getNano shouldEqual protobuf.signedUp.get.nanos
-  }
-
-  private def randomUserRecord(userId: String) = {
-    val firstName = faker.name().firstName()
-    UserRecord(
-      userId,
-      firstName,
-      faker.name().lastName(),
-      faker.internet().emailAddress(firstName),
-      randomEnum(UserStatus.enumCompanion),
-      Instant.now()
-    )
   }
 }

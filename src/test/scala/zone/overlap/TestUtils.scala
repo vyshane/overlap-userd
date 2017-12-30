@@ -3,12 +3,12 @@
 package zone.overlap
 
 import java.time.Instant
-import java.util.UUID
 
 import com.github.javafaker.Faker
 import com.trueaccord.scalapb.{GeneratedEnum, GeneratedEnumCompanion}
 import zone.overlap.privateapi.user.UserStatus
 import zone.overlap.userd.persistence.UserRecord
+import zone.overlap.userd.utils._
 
 import scala.util.Random
 
@@ -24,13 +24,15 @@ object TestUtils {
     randomUserRecord(faker.gameOfThrones().house())
   }
 
-  def randomUserRecord(password: String): UserRecord = {
+  def randomUserRecord(userId: String): UserRecord = {
     val firstName = faker.name().firstName()
     UserRecord(
-      UUID.randomUUID().toString,
+      userId,
       firstName,
       faker.name().lastName(),
       faker.internet().emailAddress(firstName.toLowerCase),
+      randomVerificationCode(),
+      hashPassword(faker.gameOfThrones().quote().toLowerCase()),
       randomEnum(UserStatus.enumCompanion),
       Instant.now()
     )

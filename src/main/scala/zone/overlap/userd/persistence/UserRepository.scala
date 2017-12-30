@@ -11,6 +11,7 @@ import io.getquill.context.jdbc.JdbcContext
 import io.getquill.context.sql.idiom.SqlIdiom
 import zone.overlap.privateapi.user.{User, UserStatus}
 import zone.overlap.api.user.{SignUpRequest, UpdateInfoRequest}
+import zone.overlap.userd.utils._
 
 import scala.util.{Failure, Success, Try}
 
@@ -18,6 +19,8 @@ case class UserRecord(id: String,
                       firstName: String,
                       lastName: String,
                       email: String,
+                      emailVerificationCode: String,
+                      passwordHash: String,
                       status: UserStatus,
                       signedUp: Instant) {
 
@@ -56,6 +59,13 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     context.run(q).headOption
   }
 
+  def findUserByEmailVerificationCode(code: String): Option[UserRecord] = {
+    val q = quote {
+      users.filter(_.emailVerificationCode == lift(code))
+    }
+    context.run(q).headOption
+  }
+
   def createUser(signUpRequest: SignUpRequest): String = {
     val userId = UUID.randomUUID().toString
     createUser(
@@ -64,6 +74,8 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
         signUpRequest.firstName,
         signUpRequest.lastName,
         signUpRequest.email,
+        randomVerificationCode(),
+        hashPassword(signUpRequest.password), // TODO: Is there a way to only store passwords in Dex?
         UserStatus.PENDING_EMAIL_VERIFICATION,
         Instant.now()
       )
@@ -78,9 +90,28 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     context.run(q)
   }
 
-  def updateUser(email: String, updateInfoRequest: UpdateInfoRequest): Unit = {
-    // TODO: Implement using userId instead
-    ???
+  def updateUser(currentEmail: String, updateInfoRequest: UpdateInfoRequest): Unit = {
+    val q = quote {
+      users
+        .filter(_.email == lift(currentEmail))
+        .update(
+          _.firstName -> lift(updateInfoRequest.firstName),
+          _.lastName -> lift(updateInfoRequest.lastName),
+          _.email -> lift(updateInfoRequest.email)
+        )
+    }
+    context.run(q)
+  }
+
+  def updateUserStatus(email: String, userStatus: UserStatus): Unit = {
+    val q = quote {
+      users
+        .filter(_.email == lift(email))
+        .update(
+          _.status -> lift(userStatus)
+        )
+    }
+    context.run(q)
   }
 
   // Simple health check. Can we query the users database table?

@@ -4,12 +4,9 @@ package zone.overlap.api.endpoints
 
 import java.time.{Clock, Instant}
 
-import com.coreos.dex.api.api.{CreatePasswordReq, CreatePasswordResp, Password => DexPassword}
-import com.google.protobuf.ByteString
 import com.google.protobuf.timestamp.Timestamp
 import io.grpc.Status
 import monix.eval.Task
-import org.slf4j.LoggerFactory
 import zone.overlap.internalapi.events.user.UserSignedUp
 import zone.overlap.api.user.{SignUpRequest, SignUpResponse}
 import zone.overlap.userd.persistence.UserRecord
@@ -18,19 +15,14 @@ import scala.collection.mutable.ListBuffer
 
 object SignUpEndpoint {
 
-  private val log = LoggerFactory.getLogger(this.getClass)
-
   def signUp(findUserByEmail: String => Option[UserRecord],
              createUser: SignUpRequest => String,
-             registerUserWithDex: CreatePasswordReq => Task[CreatePasswordResp],
              notifyUserSignedUp: UserSignedUp => Task[Unit],
              clock: Clock)(request: SignUpRequest): Task[SignUpResponse] = {
     Task(request)
       .flatMap(ensureValidSignUpRequest(_))
       .flatMap(ensureEmailNotTaken(findUserByEmail)(_))
       .map(createUser(_))
-      .flatMap(userId =>
-        registerWithDex(registerUserWithDex)(buildCreatePasswordReq(userId, request.email, request.password)))
       .flatMap { userId =>
         val userSignedUp = buildUserSignedUpMessage(clock)(userId, request)
         notifyUserSignedUp(userSignedUp).map(_ => SignUpResponse(userId))
@@ -77,33 +69,6 @@ object SignUpEndpoint {
       .map(_ =>
         Task.raiseError(Status.ALREADY_EXISTS.augmentDescription("Email address is already taken").asRuntimeException()))
       .getOrElse(Task(signUpRequest))
-  }
-
-  private def registerWithDex(createDexPassword: CreatePasswordReq => Task[CreatePasswordResp])(
-      request: CreatePasswordReq): Task[String] = {
-    createDexPassword(request)
-      .flatMap(resp => {
-        if (resp.alreadyExists) {
-          log.error("Unable to create password in dex: User already exists")
-          Task.raiseError(Status.ABORTED.augmentDescription("User already exists in auth service").asRuntimeException())
-        } else {
-          Task(request.password.get.userId)
-        }
-      })
-  }
-
-  def buildCreatePasswordReq(userId: String, email: String, password: String): CreatePasswordReq = {
-    import com.github.t3hnar.bcrypt._
-    CreatePasswordReq(
-      Option(
-        DexPassword(
-          email,
-          ByteString.copyFromUtf8(password.bcrypt),
-          email,
-          userId
-        )
-      )
-    )
   }
 
   private def buildUserSignedUpMessage(clock: Clock)(userId: String, signUpRequest: SignUpRequest): UserSignedUp = {

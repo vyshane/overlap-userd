@@ -6,9 +6,9 @@ import java.time.Clock
 
 import com.coreos.dex.api.api.ApiGrpcMonix
 import monix.eval.Task
-import zone.overlap.api.endpoints.{SignUpEndpoint, UpdateInfoEndpoint}
+import zone.overlap.api.endpoints.{SignUpEndpoint, UpdateInfoEndpoint, VerifyEmailEndpoint}
 import zone.overlap.api.user._
-import zone.overlap.userd.authentication.{UserContext, UserContextServerInterceptor}
+import zone.overlap.userd.authentication.UserContextServerInterceptor
 import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence.UserRepository
 
@@ -18,12 +18,15 @@ class PublicUserService(userRepository: UserRepository[_, _], dexStub: ApiGrpcMo
   override def signUp(request: SignUpRequest): Task[SignUpResponse] = {
     SignUpEndpoint.signUp(userRepository.findUserByEmail,
                           userRepository.createUser,
-                          dexStub.createPassword,
                           eventPublisher.sendUserSignedUp,
                           Clock.systemUTC())(request)
   }
 
-  override def verifyEmail(request: VerifyEmailRequest) = ???
+  override def verifyEmail(request: VerifyEmailRequest): Task[VerifyEmailResponse] = {
+    VerifyEmailEndpoint.verifyEmail(userRepository.findUserByEmailVerificationCode,
+                                    userRepository.updateUserStatus,
+                                    dexStub.createPassword)(request)
+  }
 
   override def resendVerificationEmail(request: ResendVerificationEmailRequest) = ???
 
