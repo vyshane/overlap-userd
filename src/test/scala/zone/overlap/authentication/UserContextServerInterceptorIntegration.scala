@@ -21,18 +21,8 @@ import org.jsoup.{Connection, Jsoup}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import zone.overlap.api.endpoints.VerifyEmailEndpoint
 import zone.overlap.docker.DockerDexService
-import zone.overlap.api.user.{
-  ChangePasswordRequest,
-  DeleteAccountRequest,
-  ResendVerificationEmailRequest,
-  SignUpRequest,
-  SignUpResponse,
-  UpdateInfoRequest,
-  UpdateInfoResponse,
-  VerifyEmailRequest,
-  UserGrpcMonix => PublicUserGrpcMonix
-}
-import zone.overlap.userd.authentication.{IdTokenCallCredentials, UserContextServerInterceptor}
+import zone.overlap.api.user.{ChangePasswordRequest, DeleteAccountRequest, ResendVerificationEmailRequest, SignUpRequest, SignUpResponse, UpdateInfoRequest, UpdateInfoResponse, VerifyEmailRequest, UserGrpcMonix => PublicUserGrpcMonix}
+import zone.overlap.userd.authentication.{IdTokenCallCredentials, UserContext, UserContextServerInterceptor}
 import zone.overlap.userd.utils._
 
 import scala.concurrent.Await
@@ -49,7 +39,10 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
 
   val faker = new Faker()
   val serverName = s"userd-test-server-${UUID.randomUUID().toString}"
-  val email = faker.internet().emailAddress()
+  val firstName = faker.name().firstName()
+  val lastName = faker.name().lastName()
+  val displayName = s"$firstName $lastName"
+  val email = faker.internet().emailAddress(s"$firstName.$lastName".toLowerCase)
   val clientId = "integration-test-app"
   val clientSecret = "ZXhhbXBsZS1hcHAtc2VjcmV0"
   val dexHost = "127.0.0.1"
@@ -108,7 +101,8 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
         val password = faker.lorem().word()
 
         // Register a user account with Dex
-        val request = VerifyEmailEndpoint.buildCreatePasswordReq(userId, email, hashPassword(password))
+        val request =
+          VerifyEmailEndpoint.buildCreatePasswordReq(userId, displayName, email, hashPassword(password))
         Await.result(dexStub.createPassword(request).runAsync, 5 seconds)
 
         // Start a local HTTP server to provide the callback endpoint
@@ -122,7 +116,7 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
           s"client_secret=$clientSecret&" +
           s"redirect_uri=http://127.0.0.1:$callbackPort/callback&" +
           "response_type=code&" +
-          "scope=openid%20email%20profile%20groups"
+          "scope=openid%20email%20profile%20groups%20offline_access"
 
         // Access the Dex authorization endpoint. Dex will redirect us to a login page.
         val loginUrl = Jsoup
@@ -205,9 +199,13 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
       UserContextServerInterceptor
         .ensureAuthenticated()
         .flatMap { userContext =>
-          if (userContext.email == email) Task(UpdateInfoResponse())
+          if (validUserContext(userContext)) Task(UpdateInfoResponse())
           else Task.raiseError(Status.UNAUTHENTICATED.asRuntimeException())
         }
+    }
+
+    private def validUserContext(userContext: UserContext): Boolean = {
+      userContext.email == email && userContext.displayName == displayName
     }
 
     override def signUp(request: SignUpRequest): Task[SignUpResponse] = ???

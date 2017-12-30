@@ -66,7 +66,7 @@ class UserContextServerInterceptor(config: Config) extends ServerInterceptor {
 
   private def decodeUserContext(jwt: String): Option[UserContext] = {
     Try(validator.validate(JWTParser.parse(jwt), null))
-      .map(claims => UserContext(claims.getStringClaim("email")))
+      .map(claims => UserContext(claims.getStringClaim("email"), claims.getStringClaim("name")))
       .toOption
   }
 

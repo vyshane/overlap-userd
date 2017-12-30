@@ -23,7 +23,9 @@ object VerifyEmailEndpoint {
       .map(Task(_))
       .getOrElse(
         Task.raiseError(Status.INVALID_ARGUMENT.augmentDescription("Invalid email verification code").asRuntimeException()))
-      .flatMap(user => registerWithDex(registerUserWithDex)(buildCreatePasswordReq(user.id, user.email, user.passwordHash)))
+      .flatMap(user =>
+        registerWithDex(registerUserWithDex)(
+          buildCreatePasswordReq(user.id, displayName(user), user.email, user.passwordHash)))
       .map(email => updateUserStatus(email, UserStatus.ACTIVE))
       .map(_ => VerifyEmailResponse())
   }
@@ -41,16 +43,18 @@ object VerifyEmailEndpoint {
       })
   }
 
-  def buildCreatePasswordReq(userId: String, email: String, passwordHash: String): CreatePasswordReq = {
+  def buildCreatePasswordReq(userId: String, displayName: String, email: String, passwordHash: String): CreatePasswordReq = {
     CreatePasswordReq(
       Option(
         DexPassword(
           email,
           ByteString.copyFromUtf8(passwordHash),
-          email,
+          displayName,
           userId
         )
       )
     )
   }
+
+  private def displayName(user: UserRecord): String = s"$user.firstName $user.lastName"
 }
