@@ -23,9 +23,9 @@ case object EmailIsInvalid extends UserValidation {
 }
 
 case object EmailIsTaken extends UserValidation {
-  override def errorMessage: String = "Email address already taken"
+  override def errorMessage: String = "Email address is already taken"
 }
 
 case object PasswordIsTooShort extends UserValidation {
-  override def errorMessage: String = "Password must be longer than 6 characters"
+  override def errorMessage: String = "Password must be at least 6 characters"
 }

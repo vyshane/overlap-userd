@@ -61,7 +61,7 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
       }
     }
     "sent a request with an email address that is already taken" should {
-      "raise an already exists error saying that the email address is taken" in {
+      "raise an invalid argument error saying that the email address is taken" in {
         val findUserByEmail = mockFunction[String, Option[UserRecord]]
         findUserByEmail
           .expects(*)
@@ -77,7 +77,7 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
             )(randomSignUpRequest())
             .runAsync
         } map { error =>
-          error.getStatus.getCode shouldEqual Status.ALREADY_EXISTS.getCode
+          error.getStatus.getCode shouldEqual Status.INVALID_ARGUMENT.getCode
           error.getMessage.contains("Email address is already taken") shouldBe true
         }
       }
