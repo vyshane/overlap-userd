@@ -1,12 +1,11 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.api
+package zone.overlap.userd.endpoints.api
 
 import java.time.Clock
 
 import com.coreos.dex.api.api.ApiGrpcMonix
 import monix.eval.Task
-import zone.overlap.api.endpoints.{SignUpEndpoint, UpdateInfoEndpoint, VerifyEmailEndpoint}
 import zone.overlap.api.user._
 import zone.overlap.userd.authentication.UserContextServerInterceptor
 import zone.overlap.userd.events.EventPublisher

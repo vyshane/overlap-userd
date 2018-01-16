@@ -1,8 +1,11 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.api.endpoints
+package zone.overlap.userd.endpoints.api
 
-class VerifyEmailEndpointSpec {
+import org.scalamock.scalatest.AsyncMockFactory
+import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
+
+class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matchers with RecoverMethods {
 
 //  val createDexPassword = mockFunction[CreatePasswordReq, Task[CreatePasswordResp]]
 //  createDexPassword

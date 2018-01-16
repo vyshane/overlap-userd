@@ -1,6 +1,6 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.api.endpoints
+package zone.overlap.userd.endpoints.api
 
 import java.time.{Clock, Instant, ZoneId}
 import java.util.UUID

@@ -8,13 +8,13 @@ import io.getquill.{PostgresJdbcContext, SnakeCase}
 import io.grpc.netty.NettyServerBuilder
 import io.grpc.{ManagedChannelBuilder, ServerInterceptors}
 import io.prometheus.client.exporter.HTTPServer
-import zone.overlap.api.PublicUserService
 import zone.overlap.api.user.UserGrpcMonix
 import zone.overlap.privateapi.user.{UserGrpcMonix => PrivateUserGrpcMonix}
-import zone.overlap.privateapi.PrivateUserService
 import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence._
 import zone.overlap.userd.authentication.UserContextServerInterceptor
+import zone.overlap.userd.endpoints.api.PublicUserService
+import zone.overlap.userd.endpoints.privateapi.PrivateUserService
 import zone.overlap.userd.monitoring.StatusServer
 
 /*

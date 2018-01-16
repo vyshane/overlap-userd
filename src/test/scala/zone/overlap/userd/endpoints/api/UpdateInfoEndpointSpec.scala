@@ -1,6 +1,6 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.api.endpoints
+package zone.overlap.userd.endpoints.api
 
 import org.scalamock.scalatest.AsyncMockFactory
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}

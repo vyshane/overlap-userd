@@ -7,7 +7,7 @@ import java.util.UUID
 import com.github.javafaker.Faker
 import io.grpc.StatusRuntimeException
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
-import zone.overlap.privateapi.Endpoints._
+import zone.overlap.userd.endpoints.privateapi.Endpoints._
 import zone.overlap.privateapi.user.{FindUserByIdRequest, User}
 import zone.overlap.userd.persistence.UserRecord
 import zone.overlap.TestUtils._

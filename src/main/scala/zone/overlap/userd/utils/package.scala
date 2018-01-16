@@ -2,7 +2,8 @@
 
 package zone.overlap.userd
 
-import java.util.UUID
+import java.nio.ByteBuffer
+import java.util.{Base64, UUID}
 
 package object utils {
 
@@ -12,5 +13,15 @@ package object utils {
     password.bcrypt
   }
 
-  def randomVerificationCode(): String = UUID.randomUUID().toString.replace("-", "")
+  // Generates a random base64 encoded UUID with the trailing == characters removed
+  def randomUniqueCode(): String = {
+    val uuid = UUID.randomUUID()
+    val uuidBytes = ByteBuffer
+      .wrap(new Array[Byte](16))
+      .putLong(uuid.getMostSignificantBits)
+      .putLong(uuid.getLeastSignificantBits)
+      .array
+    val encoder = Base64.getUrlEncoder()
+    encoder.encodeToString(uuidBytes).substring(0, 22)
+  }
 }

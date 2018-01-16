@@ -1,13 +1,13 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.privateapi
+package zone.overlap.userd.endpoints.privateapi
 
 import io.grpc.Status
 import monix.eval.Task
 import zone.overlap.privateapi.user.{FindUserByIdRequest, FindUserByIdResponse}
 import zone.overlap.userd.persistence.UserRecord
 
-package object Endpoints {
+object Endpoints {
 
   def findUserById(queryDb: String => Option[UserRecord])(request: FindUserByIdRequest): Task[FindUserByIdResponse] = {
     if (request.userId.isEmpty)

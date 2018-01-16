@@ -31,7 +31,7 @@ object TestUtils {
       firstName,
       faker.name().lastName(),
       faker.internet().emailAddress(firstName.toLowerCase),
-      randomVerificationCode(),
+      randomUniqueCode(),
       hashPassword(faker.gameOfThrones().quote().toLowerCase()),
       randomEnum(UserStatus.enumCompanion),
       Instant.now()

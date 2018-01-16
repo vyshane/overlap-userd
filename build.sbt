@@ -17,6 +17,7 @@ dockerUpdateLatest := true
 // Compiler
 scalaVersion := "2.12.4"
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
+scalacOptions += "-Ypartial-unification" // Required by Typelevel Cats
 
 // Dependencies
 resolvers += Resolver.bintrayRepo("beyondthelines", "maven")
@@ -25,6 +26,9 @@ resolvers += Resolver.bintrayRepo("cakesolutions", "maven")
 libraryDependencies ++= Seq(
   // Configuration
   "com.typesafe" % "config" % "1.3.2",
+
+  // FP
+  "org.typelevel" %% "cats-core" % "1.0.1",
 
   // Concurrency
   "io.monix" %% "monix" % "2.3.0",

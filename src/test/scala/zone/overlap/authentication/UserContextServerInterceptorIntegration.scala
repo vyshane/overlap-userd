@@ -19,10 +19,10 @@ import io.grpc.util.MutableHandlerRegistry
 import monix.eval.Task
 import org.jsoup.{Connection, Jsoup}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
-import zone.overlap.api.endpoints.VerifyEmailEndpoint
 import zone.overlap.docker.DockerDexService
 import zone.overlap.api.user.{ChangePasswordRequest, DeleteAccountRequest, ResendVerificationEmailRequest, SignUpRequest, SignUpResponse, UpdateInfoRequest, UpdateInfoResponse, VerifyEmailRequest, UserGrpcMonix => PublicUserGrpcMonix}
 import zone.overlap.userd.authentication.{IdTokenCallCredentials, UserContext, UserContextServerInterceptor}
+import zone.overlap.userd.endpoints.api.VerifyEmailEndpoint
 import zone.overlap.userd.utils._
 
 import scala.concurrent.Await

@@ -1,6 +1,6 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.privateapi
+package zone.overlap.userd.endpoints.privateapi
 
 import zone.overlap.privateapi.user._
 import zone.overlap.userd.persistence.UserRepository

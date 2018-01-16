@@ -1,6 +1,6 @@
 // Copyright 2017 Vy-Shane Xie Sin Fat
 
-package zone.overlap.api.endpoints
+package zone.overlap.userd.endpoints.api
 
 import com.coreos.dex.api.api.{CreatePasswordReq, CreatePasswordResp, Password => DexPassword}
 import com.google.protobuf.ByteString

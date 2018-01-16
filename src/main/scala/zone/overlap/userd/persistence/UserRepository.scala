@@ -74,7 +74,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
         signUpRequest.firstName,
         signUpRequest.lastName,
         signUpRequest.email,
-        randomVerificationCode(),
+        randomUniqueCode(),
         hashPassword(signUpRequest.password), // TODO: Is there a way to only store passwords in Dex?
         UserStatus.PENDING_EMAIL_VERIFICATION,
         Instant.now()
