@@ -24,7 +24,7 @@ object SignUpEndpoint {
       .map(createUser(_))
       .flatMap { userId =>
         val userSignedUp = buildUserSignedUpMessage(clock)(userId, request)
-        notifyUserSignedUp(userSignedUp).map(_ => SignUpResponse(userId))
+        notifyUserSignedUp(userSignedUp).map(_ => SignUpResponse())
       }
   }
 

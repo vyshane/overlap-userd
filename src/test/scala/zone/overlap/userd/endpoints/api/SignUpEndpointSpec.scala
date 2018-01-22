@@ -11,7 +11,7 @@ import monix.eval.Task
 import org.scalamock.scalatest.AsyncMockFactory
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
 import zone.overlap.TestUtils
-import zone.overlap.api.user.SignUpRequest
+import zone.overlap.api.user.{SignUpRequest, SignUpResponse}
 import zone.overlap.internalapi.events.user.UserSignedUp
 import zone.overlap.userd.persistence.UserRecord
 
@@ -118,7 +118,7 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
           .signUp(findUserByEmail, createUser, sendNotification, clock)(signUpRequest)
           .runAsync
           .map { response =>
-            response.userId shouldEqual newUserId
+            response shouldEqual SignUpResponse()
           }
       }
     }
