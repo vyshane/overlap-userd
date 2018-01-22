@@ -11,9 +11,7 @@ import zone.overlap.userd.authentication.UserContextServerInterceptor
 import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence.UserRepository
 
-case class PublicUserService(userRepository: UserRepository[_, _],
-                             dexStub: ApiGrpcMonix.DexStub,
-                             eventPublisher: EventPublisher)
+class PublicUserService(userRepository: UserRepository[_, _], dexStub: ApiGrpcMonix.DexStub, eventPublisher: EventPublisher)
     extends UserGrpcMonix.UserService {
 
   override def signUp(request: SignUpRequest): Task[SignUpResponse] = {

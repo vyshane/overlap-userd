@@ -50,13 +50,13 @@ object UserdApplication {
       .build()
     lazy val dexStub = ApiGrpcMonix.stub(channel)
     lazy val publicUserService = UserGrpcMonix.bindService(
-      PublicUserService(userRepository, dexStub, eventPublisher),
+      new PublicUserService(userRepository, dexStub, eventPublisher),
       monix.execution.Scheduler.global
     )
 
     // Private user service
     lazy val privateUserService = PrivateUserGrpcMonix.bindService(
-      PrivateUserService(userRepository),
+      new PrivateUserService(userRepository),
       monix.execution.Scheduler.global
     )
 
