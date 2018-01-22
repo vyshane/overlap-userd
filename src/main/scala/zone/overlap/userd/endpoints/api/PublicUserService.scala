@@ -33,6 +33,8 @@ class PublicUserService(userRepository: UserRepository[_, _], dexStub: ApiGrpcMo
     UpdateInfoEndpoint.updateInfo(UserContextServerInterceptor.ensureAuthenticated, userRepository.updateUser)(request)
   }
 
+  override def updateEmail(request: UpdateEmailRequest): Task[UpdateEmailResponse] = ???
+
   override def changePassword(request: ChangePasswordRequest) = ???
 
   override def deleteAccount(request: DeleteAccountRequest) = ???

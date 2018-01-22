@@ -96,8 +96,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
         .filter(_.email == lift(currentEmail))
         .update(
           _.firstName -> lift(updateInfoRequest.firstName),
-          _.lastName -> lift(updateInfoRequest.lastName),
-          _.email -> lift(updateInfoRequest.email)
+          _.lastName -> lift(updateInfoRequest.lastName)
         )
     }
     context.run(q)

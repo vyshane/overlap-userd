@@ -4,7 +4,7 @@ package zone.overlap.userd.validation
 
 import cats.data.ValidatedNel
 import cats.implicits._
-import zone.overlap.api.user.SignUpRequest
+import zone.overlap.api.user.{SignUpRequest, UpdateInfoRequest}
 import zone.overlap.userd.persistence.UserRecord
 
 sealed trait RequestValidator {
@@ -42,6 +42,10 @@ sealed trait RequestValidator {
      validateLastName(request.lastName),
      validateEmail(findUserByEmail)(request.email),
      validatePassword(request.password)).mapN(SignUpRequest.apply)
+  }
+
+  def validateUpdateUserInfoRequest(request: UpdateInfoRequest): ValidationResult[UpdateInfoRequest] = {
+    (validateFirstName(request.firstName), validateLastName(request.lastName)).mapN(UpdateInfoRequest.apply)
   }
 }
 
