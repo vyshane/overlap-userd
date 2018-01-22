@@ -20,7 +20,7 @@ import monix.eval.Task
 import org.jsoup.{Connection, Jsoup}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import zone.overlap.docker.DockerDexService
-import zone.overlap.api.user.{ChangePasswordRequest, DeleteAccountRequest, ResendVerificationEmailRequest, SignUpRequest, SignUpResponse, UpdateInfoRequest, UpdateInfoResponse, VerifyEmailRequest, UserGrpcMonix => PublicUserGrpcMonix}
+import zone.overlap.api.user.{ChangePasswordRequest, DeleteAccountRequest, ResendVerificationEmailRequest, SignUpRequest, SignUpResponse, UpdateEmailRequest, UpdateEmailResponse, UpdateInfoRequest, UpdateInfoResponse, VerifyEmailRequest, UserGrpcMonix => PublicUserGrpcMonix}
 import zone.overlap.userd.authentication.{IdTokenCallCredentials, UserContext, UserContextServerInterceptor}
 import zone.overlap.userd.endpoints.api.VerifyEmailEndpoint
 import zone.overlap.userd.utils._
@@ -211,6 +211,7 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
     override def signUp(request: SignUpRequest): Task[SignUpResponse] = ???
     override def verifyEmail(request: VerifyEmailRequest) = ???
     override def resendVerificationEmail(request: ResendVerificationEmailRequest) = ???
+    override def updateEmail(request: UpdateEmailRequest): Task[UpdateEmailResponse] = ???
     override def changePassword(request: ChangePasswordRequest) = ???
     override def deleteAccount(request: DeleteAccountRequest) = ???
   }

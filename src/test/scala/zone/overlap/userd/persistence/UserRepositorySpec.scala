@@ -87,13 +87,12 @@ class UserRepositorySpec extends WordSpec with Matchers with RecoverMethods with
         userRepository.createUser(user)
         // Update user
         val firstName = faker.name().firstName()
-        val updateInfoRequest = UpdateInfoRequest(firstName, faker.name.lastName(), faker.internet().emailAddress(firstName))
+        val updateInfoRequest = UpdateInfoRequest(firstName, faker.name.lastName())
         userRepository.updateUser(user.email, updateInfoRequest)
         // Check that record was updated as expected
         val updatedUser = userRepository.findUserById(user.id)
         updatedUser.get.firstName shouldEqual updateInfoRequest.firstName
         updatedUser.get.lastName shouldEqual updateInfoRequest.lastName
-        updatedUser.get.email shouldEqual updateInfoRequest.email
       }
     }
     "an updateUserStatus method" which {
