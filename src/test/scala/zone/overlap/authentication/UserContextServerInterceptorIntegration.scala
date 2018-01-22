@@ -56,7 +56,7 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
       .withValue("oidc.issuer", ConfigValueFactory.fromAnyRef(s"http://$dexHost:$dexHttpPort/dex"))
       .withValue("oidc.jwksUrl", ConfigValueFactory.fromAnyRef(s"http://$dexHost:$dexHttpPort/dex/keys"))
       .withValue("oidc.clientId", ConfigValueFactory.fromAnyRef(clientId))
-    val userContextServerInterceptor = new UserContextServerInterceptor(config)
+    val userContextServerInterceptor = UserContextServerInterceptor(config)
 
     // Start gRPC server and set up a service to perform integration test
     val serviceRegistry = new MutableHandlerRegistry()
@@ -151,7 +151,7 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
 
         // Use the id token to make an authenticated gRPC call to the user service
         val updateInfo = mockUserServiceStub
-          .withCallCredentials(new IdTokenCallCredentials(idToken))
+          .withCallCredentials(IdTokenCallCredentials(idToken))
           .updateInfo(UpdateInfoRequest())
           .runAsync
 

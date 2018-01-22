@@ -17,17 +17,17 @@ import monix.eval.Task
 import scala.util.Try
 
 /*
- * This class is used to authenticate the user and, if valid, inject the UserContext into the gRPC call.
- * The UserContext then becomes available in gRPC service implementations that are added to the server
- * using the UserContextServerInterceptor.
+ * Used to authenticate the user and, if valid, inject the UserContext into the gRPC call.
+ * The UserContext then becomes available in gRPC service implementations that are added
+ * to the server using the UserContextServerInterceptor.
  *
- * User sessions are propagated as JSON Web Tokens through the Authorization HTTP header using the Bearer
- * schema. JWTs are signed and verified using RS256.
+ * User sessions are propagated as JSON Web Tokens through the Authorization HTTP header
+ * using the Bearer schema. JWTs are signed and verified using RS256.
  *
- * The public key used to verify the JWT is provided by a JWKS endpoint configured at oicd.jwkstUrl.
- * The key is downloaded and cached.
+ * The public key used to verify the JWT is provided by a JWKS endpoint configured at
+ * oicd.jwkstUrl. The key is downloaded and cached.
  */
-class UserContextServerInterceptor(config: Config) extends ServerInterceptor {
+case class UserContextServerInterceptor(config: Config) extends ServerInterceptor {
 
   private val validator = {
     val issuer = new Issuer(config.getString("oidc.issuer"))

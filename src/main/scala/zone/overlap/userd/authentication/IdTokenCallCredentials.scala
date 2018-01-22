@@ -6,7 +6,7 @@ import java.util.concurrent.Executor
 
 import io.grpc.{Attributes, CallCredentials, Metadata, MethodDescriptor}
 
-class IdTokenCallCredentials(accessToken: String) extends CallCredentials {
+case class IdTokenCallCredentials(idToken: String) extends CallCredentials {
 
   override def applyRequestMetadata(method: MethodDescriptor[_, _],
                                     attributes: Attributes,
@@ -16,7 +16,7 @@ class IdTokenCallCredentials(accessToken: String) extends CallCredentials {
       val headers = new Metadata()
       val authorizationHeaderKey =
         Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER)
-      headers.put(authorizationHeaderKey, "Bearer " + accessToken)
+      headers.put(authorizationHeaderKey, "Bearer " + idToken)
       applier.apply(headers)
     })
   }

@@ -10,7 +10,7 @@ import org.apache.kafka.common.serialization.{ByteArraySerializer, StringSeriali
 import org.slf4j.LoggerFactory
 import zone.overlap.internalapi.events.user.UserSignedUp
 
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 case class EventPublisher(config: Config) {
 
@@ -30,5 +30,9 @@ case class EventPublisher(config: Config) {
         case Success(_)     => ()
         case Failure(error) => log.error("Error publishing UserSignedUp event", error)
     }))
+  }
+
+  def canQueryTopicPartitions(): Boolean = {
+    Try(producer.partitionsFor(config.getString("kafka.topic.events.UserSignedUp"))).isSuccess
   }
 }

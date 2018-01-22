@@ -34,14 +34,14 @@ object UserdApplication {
     // Setup database access
     if (config.getString("autoMigrateDatabaseOnLaunch").toLowerCase() == "yes")
       DatabaseMigrator(config).migrate()
-    lazy val context = new PostgresJdbcContext(SnakeCase, "database") with Encoders with Decoders with Quotes
-    lazy val userRepository = UserRepository(context)
+    lazy val databaseContext = new PostgresJdbcContext(SnakeCase, "database") with Encoders with Decoders with Quotes
+    lazy val userRepository = UserRepository(databaseContext)
 
     // Kafka
     lazy val eventPublisher = EventPublisher(config)
 
     // User authentication
-    lazy val userContextServerInterceptor = new UserContextServerInterceptor(config)
+    lazy val userContextServerInterceptor = UserContextServerInterceptor(config)
 
     // Public user service
     lazy val channel = ManagedChannelBuilder
@@ -50,13 +50,13 @@ object UserdApplication {
       .build()
     lazy val dexStub = ApiGrpcMonix.stub(channel)
     lazy val publicUserService = UserGrpcMonix.bindService(
-      new PublicUserService(userRepository, dexStub, eventPublisher),
+      PublicUserService(userRepository, dexStub, eventPublisher),
       monix.execution.Scheduler.global
     )
 
     // Private user service
     lazy val privateUserService = PrivateUserGrpcMonix.bindService(
-      new PrivateUserService(userRepository),
+      PrivateUserService(userRepository),
       monix.execution.Scheduler.global
     )
 
@@ -72,7 +72,7 @@ object UserdApplication {
     statusServer.indicateReady()
 
     statusServer.healthChecker = () => {
-      userRepository.canQueryUsers()
+      userRepository.canQueryUsers() && eventPublisher.canQueryTopicPartitions()
     }
 
     grpcServer.awaitTermination()

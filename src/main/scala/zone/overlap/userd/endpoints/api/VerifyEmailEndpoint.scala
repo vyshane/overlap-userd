@@ -15,6 +15,9 @@ object VerifyEmailEndpoint {
 
   private val log = LoggerFactory.getLogger(this.getClass)
 
+  /*
+   * Mark user email as having been verified and register user with Dex
+   */
   def verifyEmail(findUserByEmailVerificationCode: String => Option[UserRecord],
                   updateUserStatus: (String, UserStatus) => Unit,
                   registerUserWithDex: CreatePasswordReq => Task[CreatePasswordResp])(
