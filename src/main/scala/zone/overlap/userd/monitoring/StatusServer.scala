@@ -23,7 +23,7 @@ class StatusServer(val port: Int, var healthChecker: HealthChecker = () => true)
   def startAndIndicateNotReady() = {
     setAsyncRunner(BoundRunner(Executors.newFixedThreadPool(2)))
     start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
-    log.info(s"Serving health and metrics on port $port")
+    log.info(s"Serving status via HTTP on port $port at /health and /readiness")
     this
   }
 
@@ -38,7 +38,7 @@ class StatusServer(val port: Int, var healthChecker: HealthChecker = () => true)
   }
 
   private def serveHealth(): Response = {
-    if (healthChecker.apply()) respond(Response.Status.OK, "Healthy")
+    if (healthChecker()) respond(Response.Status.OK, "Healthy")
     else respond(Response.Status.INTERNAL_ERROR, "Unhealthy")
   }
 

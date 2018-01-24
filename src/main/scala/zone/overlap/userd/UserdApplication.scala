@@ -8,6 +8,7 @@ import io.getquill.{PostgresJdbcContext, SnakeCase}
 import io.grpc.netty.NettyServerBuilder
 import io.grpc.{ManagedChannelBuilder, ServerInterceptors}
 import io.prometheus.client.exporter.HTTPServer
+import org.slf4j.LoggerFactory
 import zone.overlap.api.user.UserGrpcMonix
 import zone.overlap.privateapi.user.{UserGrpcMonix => PrivateUserGrpcMonix}
 import zone.overlap.userd.events.EventPublisher
@@ -17,19 +18,28 @@ import zone.overlap.userd.endpoints.api.PublicUserService
 import zone.overlap.userd.endpoints.privateapi.PrivateUserService
 import zone.overlap.userd.monitoring.StatusServer
 
+import scala.util.Try
+
 /*
  * Main entrypoint for our application
  */
 object UserdApplication {
+
+  private val log = LoggerFactory.getLogger(this.getClass)
 
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.load()
 
     // Start status HTTP endpoints
     val statusServer = StatusServer(config.getInt("status.port")).startAndIndicateNotReady()
+    statusServer.healthChecker = () => {
+      Try(userRepository.canQueryUsers() && eventPublisher.canQueryTopicPartitions())
+        .getOrElse(false)
+    }
 
     // Start serving Prometheus metrics via HTTP
     new HTTPServer(config.getInt("metrics.port"))
+    log.info(s"Serving metrics via HTTP on port ${config.getString("metrics.port")}")
 
     // Setup database access
     if (config.getString("autoMigrateDatabaseOnLaunch").toLowerCase() == "yes")
@@ -70,10 +80,6 @@ object UserdApplication {
 
     // gRPC server is up and we are ready to serve requests
     statusServer.indicateReady()
-
-    statusServer.healthChecker = () => {
-      userRepository.canQueryUsers() && eventPublisher.canQueryTopicPartitions()
-    }
 
     grpcServer.awaitTermination()
   }
