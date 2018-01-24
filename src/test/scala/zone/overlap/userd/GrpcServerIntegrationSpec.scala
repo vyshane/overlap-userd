@@ -15,8 +15,7 @@ import zone.overlap.privateapi.user.{FindUserByIdRequest, UserGrpcMonix => Priva
 import zone.overlap.userd.endpoints.privateapi.PrivateUserService
 import zone.overlap.userd.persistence.{Decoders, Encoders, Quotes, UserRepository}
 
-// Exercise the gRPC server, in-process only, so that we don't require
-// the test environment to have the ability to open ports
+// Exercise the gRPC server (in-process)
 class GrpcServerIntegrationSpec extends AsyncWordSpec with Matchers with RecoverMethods {
 
   "The userd gRPC server" when {
