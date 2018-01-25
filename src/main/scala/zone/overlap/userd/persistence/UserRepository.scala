@@ -9,6 +9,7 @@ import com.google.protobuf.timestamp.Timestamp
 import io.getquill._
 import io.getquill.context.jdbc.JdbcContext
 import io.getquill.context.sql.idiom.SqlIdiom
+import monix.eval.Task
 import zone.overlap.privateapi.user.{User, UserStatus}
 import zone.overlap.api.user.{SignUpRequest, UpdateInfoRequest}
 import zone.overlap.userd.utils._
@@ -19,7 +20,7 @@ case class UserRecord(id: String,
                       firstName: String,
                       lastName: String,
                       email: String,
-                      emailVerificationCode: String,
+                      emailVerificationCode: Option[String],
                       passwordHash: String,
                       status: UserStatus,
                       signedUp: Instant) {
@@ -45,28 +46,41 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     querySchema[UserRecord]("users")
   }
 
-  def findUserById(id: String): Option[UserRecord] = {
+  def findUserById(id: String): Task[Option[UserRecord]] = {
     val q = quote {
       users.filter(_.id == lift(id))
     }
-    context.run(q).headOption
+    Task(context.run(q).headOption)
   }
 
-  def findUserByEmail(email: String): Option[UserRecord] = {
+  def findUserByEmail(email: String): Task[Option[UserRecord]] = {
     val q = quote {
       users.filter(_.email == lift(email))
     }
-    context.run(q).headOption
+    Task(context.run(q).headOption)
   }
 
-  def findUserByEmailVerificationCode(code: String): Option[UserRecord] = {
+  def findUserPendingEmailVerification(code: String): Task[Option[UserRecord]] = {
     val q = quote {
-      users.filter(_.emailVerificationCode == lift(code))
+      users.filter(u => u.emailVerificationCode == lift(code) && u.status == lift(UserStatus.PENDING_EMAIL_VERIFICATION))
     }
-    context.run(q).headOption
+    Task(context.run(q).headOption)
   }
 
-  def createUser(signUpRequest: SignUpRequest): String = {
+  // Also clears the email verification code
+  def activateUser(email: String): Task[Unit] = {
+    val q = quote {
+      users
+        .filter(_.email == lift(email))
+        .update(
+          _.emailVerificationCode -> lift(Option.empty),
+          _.status -> lift(UserStatus.ACTIVE)
+        )
+    }
+    Task(context.run(q))
+  }
+
+  def createUser(signUpRequest: SignUpRequest): Task[String] = {
     val userId = UUID.randomUUID().toString
     createUser(
       UserRecord(
@@ -74,23 +88,22 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
         signUpRequest.firstName,
         signUpRequest.lastName,
         signUpRequest.email,
-        randomUniqueCode(),
-        hashPassword(signUpRequest.password), // TODO: Is there a way to only store passwords in Dex?
+        Option(randomUniqueCode()),
+        hashPassword(signUpRequest.password), // TODO: Is there a way to store passwords in Dex only?
         UserStatus.PENDING_EMAIL_VERIFICATION,
         Instant.now()
       )
-    )
-    userId
+    ).map(_ => userId)
   }
 
-  def createUser(userRecord: UserRecord): Unit = {
+  def createUser(userRecord: UserRecord): Task[Unit] = {
     val q = quote {
       users.insert(lift(userRecord))
     }
-    context.run(q)
+    Task(context.run(q))
   }
 
-  def updateUser(currentEmail: String, updateInfoRequest: UpdateInfoRequest): Unit = {
+  def updateUser(currentEmail: String, updateInfoRequest: UpdateInfoRequest): Task[Unit] = {
     val q = quote {
       users
         .filter(_.email == lift(currentEmail))
@@ -99,10 +112,10 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
           _.lastName -> lift(updateInfoRequest.lastName)
         )
     }
-    context.run(q)
+    Task(context.run(q))
   }
 
-  def updateUserStatus(email: String, userStatus: UserStatus): Unit = {
+  def updateUserStatus(email: String, userStatus: UserStatus): Task[Unit] = {
     val q = quote {
       users
         .filter(_.email == lift(email))
@@ -110,10 +123,10 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
           _.status -> lift(userStatus)
         )
     }
-    context.run(q)
+    Task(context.run(q))
   }
 
-  // Simple health check. Can we query the users database table?
+  // Simple blocking health check. Can we query the users database table?
   def canQueryUsers(): Boolean = {
     Try(
       context.run(quote(users.map(_.id))).headOption
