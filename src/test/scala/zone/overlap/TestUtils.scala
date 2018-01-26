@@ -30,7 +30,7 @@ object TestUtils {
   def randomEnumExcept[T <: GeneratedEnum](enumCompanion: GeneratedEnumCompanion[T])(except: T): Option[T] = {
     if (enumCompanion.values.size == 1) {
       // There is no enum value other than the one the caller doesn't want
-      Option.empty
+      None
     } else {
       var enum: T = randomEnum(enumCompanion)
       while (enum == except) enum = randomEnum(enumCompanion)
@@ -45,7 +45,7 @@ object TestUtils {
       firstName,
       faker.name().lastName(),
       faker.internet().emailAddress(firstName.toLowerCase),
-      Option.empty,
+      None,
       hashPassword(faker.gameOfThrones().quote().toLowerCase().replace(" ", "")),
       randomEnumExcept(UserStatus.enumCompanion)(UserStatus.PENDING_EMAIL_VERIFICATION).get.name,
       Instant.now()
