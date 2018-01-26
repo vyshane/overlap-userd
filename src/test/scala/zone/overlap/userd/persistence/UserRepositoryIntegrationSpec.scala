@@ -44,7 +44,7 @@ class UserRepositoryIntegrationSpec
   "The UserRepository" should provide {
     "a findUserById method" which {
       "returns an empty Option if the user does not exist" in {
-        awaitResult(userRepository.findUserById(UUID.randomUUID().toString)) shouldEqual Option.empty
+        awaitResult(userRepository.findUserById(UUID.randomUUID().toString)) shouldEqual None
       }
       "returns the user if the user exists" in {
         val user = randomVerifiedUserRecord()
@@ -54,7 +54,7 @@ class UserRepositoryIntegrationSpec
     }
     "a findUserByEmail method" which {
       "returns an empty Option if the user does not exist" in {
-        awaitResult(userRepository.findUserByEmail(faker.internet().emailAddress())) shouldEqual Option.empty
+        awaitResult(userRepository.findUserByEmail(faker.internet().emailAddress())) shouldEqual None
       }
       "returns the user if the user exists" in {
         val user = randomVerifiedUserRecord()
@@ -65,12 +65,12 @@ class UserRepositoryIntegrationSpec
     "a findUserPendingEmailVerification method" which {
       "returns an empty Option if the email verification code could not be found" in {
         val unknownEmail = faker.internet().emailAddress()
-        awaitResult(userRepository.findUserPendingEmailVerification(unknownEmail)) shouldEqual Option.empty
+        awaitResult(userRepository.findUserPendingEmailVerification(unknownEmail)) shouldEqual None
       }
       "returns an empty Option if the user exists but is not pending email verification" in {
         val user = randomVerifiedUserRecord().copy(emailVerificationCode = Option(randomUniqueCode()))
         awaitResult(userRepository.createUser(user))
-        awaitResult(userRepository.findUserPendingEmailVerification(user.emailVerificationCode.get)) shouldEqual Option.empty
+        awaitResult(userRepository.findUserPendingEmailVerification(user.emailVerificationCode.get)) shouldEqual None
       }
       "returns the user if a user with the email verification code was found and the user is pending email verification" in {
         val user = randomPendingUserRecord()
@@ -78,8 +78,15 @@ class UserRepositoryIntegrationSpec
         awaitResult(userRepository.findUserPendingEmailVerification(user.emailVerificationCode.get)) shouldEqual Option(user)
       }
     }
-    "a verifyEmailAndActivateUser method" which {
-      // TODO(SX)
+    "an activateUser method" which {
+      "clears the email verification code and sets the user status to active" in {
+        val user = randomPendingUserRecord()
+        awaitResult(userRepository.createUser(user))
+        awaitResult(userRepository.activateUser(user.email))
+        val activatedUser = awaitResult(userRepository.findUserByEmail(user.email))
+        activatedUser.get.status shouldEqual UserStatus.ACTIVE.name
+        activatedUser.get.emailVerificationCode shouldEqual None
+      }
     }
     "a createUser method" which {
       "creates a new user with pending email verification status" in {
