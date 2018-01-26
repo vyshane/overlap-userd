@@ -22,7 +22,7 @@ case class UserRecord(id: String,
                       email: String,
                       emailVerificationCode: Option[String],
                       passwordHash: String,
-                      status: UserStatus,
+                      status: String, // TODO(SX) We should use the UserStatus type
                       signedUp: Instant) {
 
   def toProtobuf = User(
@@ -30,7 +30,7 @@ case class UserRecord(id: String,
     firstName,
     lastName,
     email,
-    status,
+    UserStatus.fromName(status).get,
     Option(Timestamp(signedUp.getEpochSecond, signedUp.getNano))
   )
 }
@@ -62,7 +62,8 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
 
   def findUserPendingEmailVerification(code: String): Task[Option[UserRecord]] = {
     val q = quote {
-      users.filter(u => u.emailVerificationCode == lift(code) && u.status == lift(UserStatus.PENDING_EMAIL_VERIFICATION))
+      users.filter(u =>
+        u.emailVerificationCode.exists(_ == lift(code)) && u.status == lift(UserStatus.PENDING_EMAIL_VERIFICATION.name))
     }
     Task(context.run(q).headOption)
   }
@@ -74,7 +75,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
         .filter(_.email == lift(email))
         .update(
           _.emailVerificationCode -> lift(Option.empty),
-          _.status -> lift(UserStatus.ACTIVE)
+          _.status -> lift(UserStatus.ACTIVE.name)
         )
     }
     Task(context.run(q))
@@ -90,7 +91,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
         signUpRequest.email,
         Option(randomUniqueCode()),
         hashPassword(signUpRequest.password), // TODO: Is there a way to store passwords in Dex only?
-        UserStatus.PENDING_EMAIL_VERIFICATION,
+        UserStatus.PENDING_EMAIL_VERIFICATION.name,
         Instant.now()
       )
     ).map(_ => userId)
@@ -120,7 +121,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
       users
         .filter(_.email == lift(email))
         .update(
-          _.status -> lift(userStatus)
+          _.status -> lift(userStatus.name)
         )
     }
     Task(context.run(q))
