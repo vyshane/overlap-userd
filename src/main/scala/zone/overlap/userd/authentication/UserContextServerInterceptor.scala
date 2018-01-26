@@ -60,7 +60,7 @@ case class UserContextServerInterceptor(config: Config) extends ServerIntercepto
         .find(header => header.startsWith("Bearer "))
         .map(header => header.replaceFirst("Bearer ", ""))
     } catch {
-      case _: Exception => Option.empty
+      case _: Exception => None
     }
   }
 
