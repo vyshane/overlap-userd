@@ -74,7 +74,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
       users
         .filter(_.email == lift(email))
         .update(
-          _.emailVerificationCode -> lift(Option.empty),
+          _.emailVerificationCode -> lift(Option.empty[String]),
           _.status -> lift(UserStatus.ACTIVE.name)
         )
     }
