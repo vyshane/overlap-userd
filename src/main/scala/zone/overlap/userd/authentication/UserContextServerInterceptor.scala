@@ -75,7 +75,6 @@ case class UserContextServerInterceptor(config: Config) extends ServerIntercepto
 
 object UserContextServerInterceptor {
   val userContextKey: Context.Key[UserContext] = Context.key("user_context")
-
   def getUserContext(): Option[UserContext] = Option(userContextKey.get)
 
   def ensureAuthenticated(): Task[UserContext] = {
