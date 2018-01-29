@@ -19,10 +19,10 @@ sealed trait RequestValidator {
     if (lastName.length > 1 && lastName.length <= 255) lastName.validNel
     else LastNameIsInvalid.invalidNel
 
-  private def validateEmail(findUserByEmail: String => Option[UserRecord])(email: String): ValidationResult[String] =
+  private def validateEmail(emailExists: String => Boolean)(email: String): ValidationResult[String] =
     if (email.isEmpty) EmailIsRequired.invalidNel
     else if (!validateEmailFormat(email)) EmailIsInvalid.invalidNel
-    else if (findUserByEmail(email).isDefined) EmailIsTaken.invalidNel
+    else if (emailExists(email)) EmailIsTaken.invalidNel
     else email.validNel
 
   private def validateEmailFormat(email: String): Boolean = {
@@ -36,11 +36,11 @@ sealed trait RequestValidator {
     if (password.length > 6) password.validNel
     else PasswordIsTooShort.invalidNel
 
-  def validateSignUpRequest(findUserByEmail: String => Option[UserRecord])(
+  def validateSignUpRequest(emailExists: String => Boolean)(
       request: SignUpRequest): ValidationResult[SignUpRequest] = {
     (validateFirstName(request.firstName),
      validateLastName(request.lastName),
-     validateEmail(findUserByEmail)(request.email),
+     validateEmail(emailExists)(request.email),
      validatePassword(request.password)).mapN(SignUpRequest.apply)
   }
 
