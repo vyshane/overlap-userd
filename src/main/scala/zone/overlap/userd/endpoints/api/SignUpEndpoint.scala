@@ -23,7 +23,7 @@ object SignUpEndpoint extends TaskScheduling {
       existingUser <- findUserByEmail(request.email).executeOn(ioScheduler).asyncBoundary
       _ <- ensureValid(validateSignUpRequest(_ => existingUser.isDefined))(request)
       userId <- createUser(request).executeOn(ioScheduler).asyncBoundary
-      userSignedUp <- Task.now(buildUserSignedUpMessage(clock)(userId, request))
+      userSignedUp = buildUserSignedUpMessage(clock)(userId, request)
       _ <- notifyUserSignedUp(userSignedUp).executeOn(ioScheduler).asyncBoundary
     } yield SignUpResponse()
   }
