@@ -106,9 +106,11 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
 
   private def randomSignUpRequest(): SignUpRequest = {
     val firstName = faker.name().firstName()
-    SignUpRequest(firstName,
-                  faker.name().lastName(),
-                  faker.internet().emailAddress(firstName.toLowerCase),
-                  faker.lorem().characters(6).toLowerCase)
+    SignUpRequest(
+      firstName,
+      faker.name().lastName(),
+      faker.internet().emailAddress(firstName.toLowerCase),
+      faker.lorem().characters(6).toLowerCase
+    )
   }
 }
