@@ -22,9 +22,9 @@ class PublicUserService(userRepository: UserRepository[_, _], dexStub: ApiGrpcMo
   }
 
   override def verifyEmail(request: VerifyEmailRequest): Task[VerifyEmailResponse] = {
-    VerifyEmailEndpoint.verifyEmail(userRepository.findUserByEmailVerificationCode,
-                                    userRepository.updateUserStatus,
-                                    dexStub.createPassword)(request)
+    VerifyEmailEndpoint.verifyEmail(userRepository.findUserPendingEmailVerification,
+                                    dexStub.createPassword,
+                                    userRepository.activateUser)(request)
   }
 
   override def resendVerificationEmail(request: ResendVerificationEmailRequest) = ???
