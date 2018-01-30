@@ -25,9 +25,9 @@ object VerifyEmailEndpoint extends TaskScheduling {
       possibleUser <- findUserByEmailVerificationCode(request.verificationCode).executeOn(ioScheduler).asyncBoundary
       user <- ensureUserExists(possibleUser)
       createPasswordReq = buildCreatePasswordReq(user.id, displayName(user), user.email, user.passwordHash)
-      createPasswordResp <- registerUserWithDex(createPasswordReq)
+      createPasswordResp <- registerUserWithDex(createPasswordReq).executeOn(ioScheduler).asyncBoundary
       _ <- ensureDexUserCreated(createPasswordResp)
-      _ <- activateUser(user.email).asyncBoundary
+      _ <- activateUser(user.email).executeOn(ioScheduler).asyncBoundary
     } yield VerifyEmailResponse()
   }
 
