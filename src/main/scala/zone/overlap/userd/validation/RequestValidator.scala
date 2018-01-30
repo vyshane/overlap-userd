@@ -8,6 +8,7 @@ import cats.implicits._
 import io.grpc.Status
 import monix.eval.Task
 import zone.overlap.api.user.{SignUpRequest, UpdateInfoRequest}
+import zone.overlap.privateapi.user.FindUserByIdRequest
 
 sealed trait RequestValidator {
 
@@ -21,6 +22,11 @@ sealed trait RequestValidator {
         Task.raiseError(Status.INVALID_ARGUMENT.augmentDescription(errorDescription).asRuntimeException())
       }
     }
+
+  def validateFindUserByIdRequest(request: FindUserByIdRequest): ValidationResult[FindUserByIdRequest] = {
+    if (request.userId.isEmpty) UserIdIsRequired.invalidNel
+    else request.valid
+  }
 
   def validateSignUpRequest(emailExists: String => Boolean)(request: SignUpRequest): ValidationResult[SignUpRequest] = {
     (validateFirstName(request.firstName),
