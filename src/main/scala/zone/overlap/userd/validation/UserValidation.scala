@@ -6,6 +6,10 @@ sealed trait UserValidation {
   def errorMessage: String
 }
 
+case object UserIdIsRequired extends UserValidation {
+  override def errorMessage: String = "User ID is required"
+}
+
 case object FirstNameIsInvalid extends UserValidation {
   override def errorMessage: String = "First name must be between 1 and 255 characters"
 }

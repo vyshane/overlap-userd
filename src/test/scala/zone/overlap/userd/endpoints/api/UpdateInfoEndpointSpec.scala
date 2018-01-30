@@ -15,11 +15,12 @@ class UpdateInfoEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Ma
   import monix.execution.Scheduler.Implicits.global
   private val faker = new Faker()
 
+  // Verify side-effecting function calls
   "The updateInfo public endpoint" when {
     "sent an unauthenticated request" should {
-      "raise an error with status unauthenticated" in {
+      "raise an unauthenticated error and not update the user info" in {
         val ensureAuthenticated = () => Task.raiseError(Status.UNAUTHENTICATED.asRuntimeException())
-        val updateUser = mockFunction[String, UpdateInfoRequest, Unit]
+        val updateUser = mockFunction[String, UpdateInfoRequest, Task[Unit]]
         updateUser.expects(*, *).never()
 
         recoverToExceptionIf[StatusRuntimeException] {
@@ -32,10 +33,10 @@ class UpdateInfoEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Ma
       }
     }
     "sent an invalid request" should {
-      "raise an error containing the validation errors" in {
+      "raise an error containing the validation errors and not update the user info" in {
         val ensureAuthenticated = mockFunction[Task[UserContext]]
-        ensureAuthenticated.expects().returning(Task(randomUserContext()))
-        val updateUser = mockFunction[String, UpdateInfoRequest, Unit]
+        ensureAuthenticated.expects().returning(Task.now(randomUserContext()))
+        val updateUser = mockFunction[String, UpdateInfoRequest, Task[Unit]]
         updateUser.expects(*, *).never()
 
         recoverToExceptionIf[StatusRuntimeException] {
@@ -50,17 +51,18 @@ class UpdateInfoEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Ma
       }
     }
     "sent a valid request" should {
-      "update the user's info and return an update info response" in {
+      "update the user info and return an UpdateInfoResponse" in {
         val userContext = randomUserContext()
-        val ensureAuthenticated = () => Task(userContext)
+        val ensureAuthenticated = () => Task.now(userContext)
         val updateInfoRequest = UpdateInfoRequest(faker.name().firstName(), faker.name().lastName())
 
-        val updateUser = mockFunction[String, UpdateInfoRequest, Unit]
+        val updateUser = mockFunction[String, UpdateInfoRequest, Task[Unit]]
         updateUser
           .expects(where { (email: String, request: UpdateInfoRequest) =>
             email == userContext.email && request == updateInfoRequest
           })
           .once()
+          .returning(Task.now(()))
 
         UpdateInfoEndpoint
           .updateInfo(ensureAuthenticated, updateUser)(updateInfoRequest)

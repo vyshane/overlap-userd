@@ -60,7 +60,7 @@ case class UserContextServerInterceptor(config: Config) extends ServerIntercepto
         .find(header => header.startsWith("Bearer "))
         .map(header => header.replaceFirst("Bearer ", ""))
     } catch {
-      case _: Exception => Option.empty
+      case _: Exception => None
     }
   }
 
@@ -75,7 +75,6 @@ case class UserContextServerInterceptor(config: Config) extends ServerIntercepto
 
 object UserContextServerInterceptor {
   val userContextKey: Context.Key[UserContext] = Context.key("user_context")
-
   def getUserContext(): Option[UserContext] = Option(userContextKey.get)
 
   def ensureAuthenticated(): Task[UserContext] = {
