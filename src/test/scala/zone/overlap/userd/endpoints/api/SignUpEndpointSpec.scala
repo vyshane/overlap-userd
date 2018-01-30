@@ -31,13 +31,14 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
         val clock = Clock.fixed(instant, ZoneId.systemDefault())
         val userId = UUID.randomUUID().toString
         val signUpRequest = randomSignUpRequest()
-
-        buildUserSignedUpMessage(clock)(userId, signUpRequest) shouldEqual UserSignedUp(
+        val userSignedUpEvent = UserSignedUp(
           userId,
           signUpRequest.firstName,
           signUpRequest.lastName,
           signUpRequest.email,
-          Option(Timestamp(instant.getEpochSecond, instant.getNano)))
+          Option(Timestamp(instant.getEpochSecond, instant.getNano))
+        )
+        buildUserSignedUpMessage(clock)(userId, signUpRequest) shouldEqual userSignedUpEvent
       }
     }
   }
