@@ -33,7 +33,7 @@ sealed trait RequestValidator {
   }
 
   private def validatePassword(password: String): ValidationResult[String] =
-    if (password.length > 6) password.validNel
+    if (password.length >= 6) password.validNel
     else PasswordIsTooShort.invalidNel
 
   def validateSignUpRequest(emailExists: String => Boolean)(

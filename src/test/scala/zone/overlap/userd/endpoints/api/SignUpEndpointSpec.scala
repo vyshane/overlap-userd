@@ -6,13 +6,14 @@ import java.time.{Clock, Instant, ZoneId}
 import java.util.UUID
 
 import com.github.javafaker.Faker
+import com.google.protobuf.timestamp.Timestamp
 import io.grpc.{Status, StatusRuntimeException}
 import monix.eval.Task
 import org.scalamock.scalatest.AsyncMockFactory
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
-import zone.overlap.TestUtils
 import zone.overlap.api.user.{SignUpRequest, SignUpResponse}
 import zone.overlap.internalapi.events.user.UserSignedUp
+import zone.overlap.userd.endpoints.api.SignUpEndpoint._
 import zone.overlap.userd.persistence.UserRecord
 
 class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matchers with RecoverMethods {
@@ -20,12 +21,47 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
   import monix.execution.Scheduler.Implicits.global
   private val faker = new Faker()
 
+  def provide = afterWord("provide")
+
+  // Unit tests
+  "The signUp public endpoint" should provide {
+    "an ensureValidSignUpRequest method" which {
+      "raises as Task error if the SignUpRequest is not valid" in {
+        recoverToExceptionIf[StatusRuntimeException] {
+          ensureValidSignUpRequest(_ => true)(SignUpRequest()).runAsync
+        } map { error =>
+          error.getStatus.getCode shouldEqual Status.INVALID_ARGUMENT.getCode
+        }
+      }
+      "wraps the SignUpRequest in a Task if the request is valid" in {
+        val request = randomSignUpRequest()
+        ensureValidSignUpRequest(_ => false)(request).runAsync map { r =>
+          r shouldEqual request
+        }
+      }
+    }
+    "a buildUserSignedUpMessage method" which {
+      "creates a UserSignedUp message from the SignUpRequest" in {
+        val instant = Instant.now()
+        val clock = Clock.fixed(instant, ZoneId.systemDefault())
+        val userId = UUID.randomUUID().toString
+        val signUpRequest = randomSignUpRequest()
+
+        buildUserSignedUpMessage(clock)(userId, signUpRequest) shouldEqual UserSignedUp(
+          userId,
+          signUpRequest.firstName,
+          signUpRequest.lastName,
+          signUpRequest.email,
+          Option(Timestamp(instant.getEpochSecond, instant.getNano)))
+      }
+    }
+  }
+
+  // Verify side-effecting function calls
   "The signUp public endpoint" when {
     "sent an invalid request" should {
-      "raise an error containing the validation errors" in {
-        val findUserByEmail = mockFunction[String, Option[UserRecord]]
-
-        val createUser = mockFunction[SignUpRequest, String]
+      "not create the user and should not send a UserSignedUp notification" in {
+        val createUser = mockFunction[SignUpRequest, Task[String]]
         createUser.expects(*).never()
 
         val sendNotification = mockFunction[UserSignedUp, Task[Unit]]
@@ -33,52 +69,10 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
 
         recoverToExceptionIf[StatusRuntimeException] {
           SignUpEndpoint
-            .signUp(findUserByEmail, createUser, sendNotification, Clock.systemUTC())(SignUpRequest("", "", "", "abc"))
-            .runAsync
-        } map { error =>
-          error.getMessage.contains("First name must be between 1 and 255 characters") shouldBe true
-          error.getMessage.contains("Last name must be between 1 and 255 characters") shouldBe true
-          error.getMessage.contains("Email address is required") shouldBe true
-          error.getMessage.contains("Password must be at least 6 characters") shouldBe true
-        }
-      }
-    }
-    "sent a request with an invalid email address" should {
-      "raise an error saying that a valid email address is required" in {
-        val request = randomSignUpRequest().withEmail("invalid email address")
-        recoverToExceptionIf[StatusRuntimeException] {
-          SignUpEndpoint
-            .signUp(
-              mockFunction[String, Option[UserRecord]],
-              mockFunction[SignUpRequest, String],
-              mockFunction[UserSignedUp, Task[Unit]],
-              Clock.systemUTC()
-            )(request)
-            .runAsync
-        } map { error =>
-          error.getMessage.contains("Email address is invalid") shouldBe true
-        }
-      }
-    }
-    "sent a request with an email address that is already taken" should {
-      "raise an invalid argument error saying that the email address is taken" in {
-        val findUserByEmail = mockFunction[String, Option[UserRecord]]
-        findUserByEmail
-          .expects(*)
-          .returning(Option(TestUtils.randomUserRecord()))
-
-        recoverToExceptionIf[StatusRuntimeException] {
-          SignUpEndpoint
-            .signUp(
-              findUserByEmail,
-              mockFunction[SignUpRequest, String],
-              mockFunction[UserSignedUp, Task[Unit]],
-              Clock.systemUTC()
-            )(randomSignUpRequest())
+            .signUp(_ => Task.now(None), createUser, sendNotification, Clock.systemUTC())(SignUpRequest())
             .runAsync
         } map { error =>
           error.getStatus.getCode shouldEqual Status.INVALID_ARGUMENT.getCode
-          error.getMessage.contains("Email address is already taken") shouldBe true
         }
       }
     }
@@ -87,17 +81,17 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
         val signUpRequest = randomSignUpRequest()
         val newUserId = UUID.randomUUID().toString
 
-        val findUserByEmail = mockFunction[String, Option[UserRecord]]
+        val findUserByEmail = mockFunction[String, Task[Option[UserRecord]]]
         findUserByEmail
           .expects(*)
-          .returning(Option.empty)
+          .returning(Task.now(None))
 
-        val createUser = mockFunction[SignUpRequest, String]
+        val createUser = mockFunction[SignUpRequest, Task[String]]
         createUser
           .expects(where { theRequest: SignUpRequest =>
             theRequest == signUpRequest
           })
-          .returning(newUserId)
+          .returning(Task.now(newUserId))
 
         val instant = Instant.now()
         val clock = Clock.fixed(instant, ZoneId.systemDefault())
@@ -129,6 +123,6 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
     SignUpRequest(firstName,
                   faker.name().lastName(),
                   faker.internet().emailAddress(firstName.toLowerCase),
-                  faker.superhero().name())
+                  faker.lorem().characters(6).toLowerCase)
   }
 }

@@ -19,15 +19,18 @@ object SignUpEndpoint extends TaskScheduling {
   def signUp(findUserByEmail: String => Task[Option[UserRecord]],
              createUser: SignUpRequest => Task[String],
              notifyUserSignedUp: UserSignedUp => Task[Unit],
-             clock: Clock)(request: SignUpRequest): Task[SignUpResponse] = {
-    for (existingUser <- findUserByEmail(request.email).executeOn(ioScheduler).asyncBoundary;
-         _ <- ensureValidSignUpRequest(_ => existingUser.isDefined)(request);
-         userId <- createUser(request).executeOn(ioScheduler).asyncBoundary;
-         userSignedUp <- buildUserSignedUpMessage(clock)(userId, request);
-         _ <- notifyUserSignedUp(userSignedUp).executeOn(ioScheduler).asyncBoundary) yield (SignUpResponse())
+             clock: Clock)
+            (request: SignUpRequest): Task[SignUpResponse] = {
+    for {
+      existingUser <- findUserByEmail(request.email).executeOn(ioScheduler).asyncBoundary
+      _ <- ensureValidSignUpRequest(_ => existingUser.isDefined)(request)
+      userId <- createUser(request).executeOn(ioScheduler).asyncBoundary
+      userSignedUp <- Task.now(buildUserSignedUpMessage(clock)(userId, request))
+      _ <- notifyUserSignedUp(userSignedUp).executeOn(ioScheduler).asyncBoundary
+    } yield SignUpResponse()
   }
 
-  private def ensureValidSignUpRequest(emailExists: String => Boolean)(request: SignUpRequest): Task[SignUpRequest] = {
+  private[api] def ensureValidSignUpRequest(emailExists: String => Boolean)(request: SignUpRequest): Task[SignUpRequest] = {
     RequestValidator.validateSignUpRequest(emailExists)(request) match {
       case Valid(request) => Task(request)
       case Invalid(nel) => {
@@ -37,7 +40,7 @@ object SignUpEndpoint extends TaskScheduling {
     }
   }
 
-  private def buildUserSignedUpMessage(clock: Clock)(userId: String, signUpRequest: SignUpRequest): UserSignedUp = {
+  private[api] def buildUserSignedUpMessage(clock: Clock)(userId: String, signUpRequest: SignUpRequest): UserSignedUp = {
     val now = Instant.now(clock)
     UserSignedUp(
       userId,
