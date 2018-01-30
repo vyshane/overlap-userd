@@ -4,15 +4,13 @@ package zone.overlap.userd.endpoints.api
 
 import java.time.{Clock, Instant}
 
-import cats.data.Validated.{Invalid, Valid}
 import com.google.protobuf.timestamp.Timestamp
-import io.grpc.Status
 import monix.eval.Task
 import zone.overlap.api.user.{SignUpRequest, SignUpResponse}
 import zone.overlap.internalapi.events.user.UserSignedUp
 import zone.overlap.userd.endpoints.TaskScheduling
 import zone.overlap.userd.persistence.UserRecord
-import zone.overlap.userd.validation.RequestValidator
+import zone.overlap.userd.validation.RequestValidator._
 
 object SignUpEndpoint extends TaskScheduling {
 
@@ -23,21 +21,11 @@ object SignUpEndpoint extends TaskScheduling {
             (request: SignUpRequest): Task[SignUpResponse] = {
     for {
       existingUser <- findUserByEmail(request.email).executeOn(ioScheduler).asyncBoundary
-      _ <- ensureValidSignUpRequest(_ => existingUser.isDefined)(request)
+      _ <- ensureValid(validateSignUpRequest(_ => existingUser.isDefined))(request)
       userId <- createUser(request).executeOn(ioScheduler).asyncBoundary
       userSignedUp <- Task.now(buildUserSignedUpMessage(clock)(userId, request))
       _ <- notifyUserSignedUp(userSignedUp).executeOn(ioScheduler).asyncBoundary
     } yield SignUpResponse()
-  }
-
-  private[api] def ensureValidSignUpRequest(emailExists: String => Boolean)(request: SignUpRequest): Task[SignUpRequest] = {
-    RequestValidator.validateSignUpRequest(emailExists)(request) match {
-      case Valid(request) => Task(request)
-      case Invalid(nel) => {
-        val errorDescription = nel.map(v => v.errorMessage).toList.mkString("\n")
-        Task.raiseError(Status.INVALID_ARGUMENT.augmentDescription(errorDescription).asRuntimeException())
-      }
-    }
   }
 
   private[api] def buildUserSignedUpMessage(clock: Clock)(userId: String, signUpRequest: SignUpRequest): UserSignedUp = {

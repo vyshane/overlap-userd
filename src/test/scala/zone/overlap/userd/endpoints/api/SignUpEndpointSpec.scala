@@ -25,21 +25,6 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
 
   // Unit tests
   "The signUp public endpoint" should provide {
-    "an ensureValidSignUpRequest method" which {
-      "raises as Task error if the SignUpRequest is not valid" in {
-        recoverToExceptionIf[StatusRuntimeException] {
-          ensureValidSignUpRequest(_ => true)(SignUpRequest()).runAsync
-        } map { error =>
-          error.getStatus.getCode shouldEqual Status.INVALID_ARGUMENT.getCode
-        }
-      }
-      "wraps the SignUpRequest in a Task if the request is valid" in {
-        val request = randomSignUpRequest()
-        ensureValidSignUpRequest(_ => false)(request).runAsync map { r =>
-          r shouldEqual request
-        }
-      }
-    }
     "a buildUserSignedUpMessage method" which {
       "creates a UserSignedUp message from the SignUpRequest" in {
         val instant = Instant.now()

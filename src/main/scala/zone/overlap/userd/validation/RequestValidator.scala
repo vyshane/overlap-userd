@@ -2,10 +2,12 @@
 
 package zone.overlap.userd.validation
 
+import cats.data.Validated.{Invalid, Valid}
 import cats.data.ValidatedNel
 import cats.implicits._
+import io.grpc.Status
+import monix.eval.Task
 import zone.overlap.api.user.{SignUpRequest, UpdateInfoRequest}
-import zone.overlap.userd.persistence.UserRecord
 
 sealed trait RequestValidator {
 
@@ -36,8 +38,16 @@ sealed trait RequestValidator {
     if (password.length >= 6) password.validNel
     else PasswordIsTooShort.invalidNel
 
-  def validateSignUpRequest(emailExists: String => Boolean)(
-      request: SignUpRequest): ValidationResult[SignUpRequest] = {
+  def ensureValid[T](validator: T => ValidationResult[T])(value: T): Task[T] =
+    validator(value) match {
+      case Valid(value) => Task(value)
+      case Invalid(nel) => {
+        val errorDescription = nel.map(v => v.errorMessage).toList.mkString("\n")
+        Task.raiseError(Status.INVALID_ARGUMENT.augmentDescription(errorDescription).asRuntimeException())
+      }
+    }
+
+  def validateSignUpRequest(emailExists: String => Boolean)(request: SignUpRequest): ValidationResult[SignUpRequest] = {
     (validateFirstName(request.firstName),
      validateLastName(request.lastName),
      validateEmail(emailExists)(request.email),
