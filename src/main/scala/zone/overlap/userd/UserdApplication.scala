@@ -43,8 +43,10 @@ object UserdApplication {
 
     // Setup database access
     if (config.getBoolean("autoMigrateDatabaseOnLaunch")) DatabaseMigrator(config).migrate()
-    lazy val databaseContext = new PostgresJdbcContext(SnakeCase, "database") with Encoders with Decoders with Quotes
-    lazy val userRepository = UserRepository(databaseContext)
+    lazy val userRepository = {
+      val databaseContext = new PostgresJdbcContext(SnakeCase, "database") with Encoders with Decoders with Quotes
+      UserRepository(databaseContext)
+    }
 
     // Kafka
     lazy val eventPublisher = EventPublisher(config)
@@ -53,15 +55,17 @@ object UserdApplication {
     lazy val userContextServerInterceptor = UserContextServerInterceptor(config)
 
     // Public user service
-    lazy val channel = ManagedChannelBuilder
-      .forAddress(config.getString("dex.host"), config.getInt("dex.port"))
-      .usePlaintext(true)
-      .build()
-    lazy val dexStub = ApiGrpcMonix.stub(channel)
-    lazy val publicUserService = UserGrpcMonix.bindService(
-      new PublicUserService(userRepository, dexStub, eventPublisher),
-      monix.execution.Scheduler.global
-    )
+    lazy val publicUserService = {
+      val channel = ManagedChannelBuilder
+        .forAddress(config.getString("dex.host"), config.getInt("dex.port"))
+        .usePlaintext(true)
+        .build()
+      val dexStub = ApiGrpcMonix.stub(channel)
+      UserGrpcMonix.bindService(
+        new PublicUserService(userRepository, dexStub, eventPublisher),
+        monix.execution.Scheduler.global
+      )
+    }
 
     // Private user service
     lazy val privateUserService = PrivateUserGrpcMonix.bindService(
