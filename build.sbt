@@ -31,7 +31,7 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-core" % "1.0.1",
 
   // Concurrency
-  "io.monix" %% "monix" % "2.3.0",
+  "io.monix" %% "monix" % "2.3.3",
 
   // gRPC and Protocol Buffers
   "io.grpc" % "grpc-netty" % "1.8.0",
