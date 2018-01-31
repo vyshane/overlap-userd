@@ -42,8 +42,7 @@ object UserdApplication {
     log.info(s"Serving metrics via HTTP on port ${config.getString("metrics.port")}")
 
     // Setup database access
-    if (config.getString("autoMigrateDatabaseOnLaunch").toLowerCase() == "yes")
-      DatabaseMigrator(config).migrate()
+    if (config.getBoolean("autoMigrateDatabaseOnLaunch")) DatabaseMigrator(config).migrate()
     lazy val databaseContext = new PostgresJdbcContext(SnakeCase, "database") with Encoders with Decoders with Quotes
     lazy val userRepository = UserRepository(databaseContext)
 
