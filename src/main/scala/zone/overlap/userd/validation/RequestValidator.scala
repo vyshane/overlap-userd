@@ -39,15 +39,15 @@ sealed trait RequestValidator {
     (validateFirstName(request.firstName), validateLastName(request.lastName)).mapN(UpdateInfoRequest.apply)
   }
 
-  private def validateFirstName(firstName: String): ValidationResult[String] =
+  private[validation] def validateFirstName(firstName: String): ValidationResult[String] =
     if (firstName.length > 1 && firstName.length <= 255) firstName.validNel
     else FirstNameIsInvalid.invalidNel
 
-  private def validateLastName(lastName: String): ValidationResult[String] =
+  private[validation] def validateLastName(lastName: String): ValidationResult[String] =
     if (lastName.length > 1 && lastName.length <= 255) lastName.validNel
     else LastNameIsInvalid.invalidNel
 
-  private def validateEmail(emailExists: String => Boolean)(email: String): ValidationResult[String] =
+  private[validation] def validateEmail(emailExists: String => Boolean)(email: String): ValidationResult[String] =
     if (email.isEmpty) EmailIsRequired.invalidNel
     else if (!validateEmailFormat(email)) EmailIsInvalid.invalidNel
     else if (emailExists(email)) EmailIsTaken.invalidNel
@@ -60,7 +60,7 @@ sealed trait RequestValidator {
       .isDefined
   }
 
-  private def validatePassword(password: String): ValidationResult[String] =
+  private[validation] def validatePassword(password: String): ValidationResult[String] =
     if (password.length >= 6) password.validNel
     else PasswordIsTooShort.invalidNel
 }
