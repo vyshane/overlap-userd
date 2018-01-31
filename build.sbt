@@ -89,8 +89,8 @@ libraryDependencies ++= Seq(
 
 // Protobuf/gRPC code generation
 PB.targets in Compile := Seq(
-  scalapb.gen(grpc = true, flatPackage = false) -> (sourceManaged in Compile).value,
-  grpcmonix.generators.GrpcMonixGenerator() -> (sourceManaged in Compile).value
+  scalapb.gen(grpc = true, flatPackage = true) -> (sourceManaged in Compile).value,
+  grpcmonix.generators.GrpcMonixGenerator(flatPackage = true) -> (sourceManaged in Compile).value
 )
 
 // Code formatting

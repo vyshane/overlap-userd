@@ -9,9 +9,9 @@ import com.github.javafaker.Faker
 import com.typesafe.config.ConfigFactory
 import io.getquill.{H2JdbcContext, SnakeCase}
 import org.scalatest._
-import zone.overlap.privateapi.user.UserStatus
+import zone.overlap.privateapi.UserStatus
 import zone.overlap.TestUtils._
-import zone.overlap.api.user.{SignUpRequest, UpdateInfoRequest}
+import zone.overlap.api.{SignUpRequest, UpdateInfoRequest}
 import zone.overlap.userd.utils._
 
 /*

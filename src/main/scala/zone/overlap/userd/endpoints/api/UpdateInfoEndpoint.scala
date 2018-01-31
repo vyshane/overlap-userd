@@ -3,7 +3,7 @@
 package zone.overlap.userd.endpoints.api
 
 import monix.eval.Task
-import zone.overlap.api.user.{UpdateInfoRequest, UpdateInfoResponse}
+import zone.overlap.api.{UpdateInfoRequest, UpdateInfoResponse}
 import zone.overlap.userd.authentication.UserContext
 import zone.overlap.userd.endpoints.TaskScheduling
 import zone.overlap.userd.validation.RequestValidator._

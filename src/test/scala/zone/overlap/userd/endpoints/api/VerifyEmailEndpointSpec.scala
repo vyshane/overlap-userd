@@ -4,7 +4,7 @@ package zone.overlap.userd.endpoints.api
 
 import java.util.UUID
 
-import com.coreos.dex.api.api.{CreatePasswordReq, CreatePasswordResp, Password}
+import com.coreos.dex.api.{CreatePasswordReq, CreatePasswordResp, Password}
 import com.github.javafaker.Faker
 import com.google.protobuf.ByteString
 import io.grpc.{Status, StatusRuntimeException}
@@ -12,7 +12,7 @@ import monix.eval.Task
 import org.scalamock.scalatest.AsyncMockFactory
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
 import zone.overlap.TestUtils._
-import zone.overlap.api.user.{VerifyEmailRequest, VerifyEmailResponse}
+import zone.overlap.api.{VerifyEmailRequest, VerifyEmailResponse}
 import zone.overlap.userd.endpoints.api.VerifyEmailEndpoint._
 import zone.overlap.userd.persistence.UserRecord
 

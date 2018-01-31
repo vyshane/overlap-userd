@@ -9,8 +9,8 @@ import cats.implicits._
 import com.github.javafaker.Faker
 import io.grpc.{Status, StatusRuntimeException}
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
-import zone.overlap.api.user.{SignUpRequest, UpdateInfoRequest}
-import zone.overlap.privateapi.user.FindUserByIdRequest
+import zone.overlap.api.{SignUpRequest, UpdateInfoRequest}
+import zone.overlap.privateapi.FindUserByIdRequest
 import zone.overlap.userd.validation.RequestValidator._
 
 class RequestValidatorSpec extends AsyncWordSpec with Matchers with RecoverMethods {

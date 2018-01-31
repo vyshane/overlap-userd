@@ -11,8 +11,8 @@ import io.grpc.{Status, StatusRuntimeException}
 import monix.eval.Task
 import org.scalamock.scalatest.AsyncMockFactory
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
-import zone.overlap.api.user.{SignUpRequest, SignUpResponse}
-import zone.overlap.internalapi.events.user.UserSignedUp
+import zone.overlap.api.{SignUpRequest, SignUpResponse}
+import zone.overlap.internalapi.events.UserSignedUp
 import zone.overlap.userd.endpoints.api.SignUpEndpoint._
 import zone.overlap.userd.persistence.UserRecord
 

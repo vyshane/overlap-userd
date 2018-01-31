@@ -6,7 +6,7 @@ import java.time.Instant
 import java.util.Date
 
 import io.getquill.MappedEncoding
-import zone.overlap.privateapi.user.UserStatus
+import zone.overlap.privateapi.UserStatus
 
 // Common decoders
 trait Decoders {

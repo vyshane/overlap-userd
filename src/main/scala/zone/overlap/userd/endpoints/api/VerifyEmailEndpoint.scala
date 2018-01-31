@@ -2,12 +2,12 @@
 
 package zone.overlap.userd.endpoints.api
 
-import com.coreos.dex.api.api.{CreatePasswordReq, CreatePasswordResp, Password => DexPassword}
+import com.coreos.dex.api.{CreatePasswordReq, CreatePasswordResp, Password => DexPassword}
 import com.google.protobuf.ByteString
 import io.grpc.Status
 import monix.eval.Task
 import org.slf4j.LoggerFactory
-import zone.overlap.api.user.{VerifyEmailRequest, VerifyEmailResponse}
+import zone.overlap.api.{VerifyEmailRequest, VerifyEmailResponse}
 import zone.overlap.userd.endpoints.TaskScheduling
 import zone.overlap.userd.persistence.UserRecord
 

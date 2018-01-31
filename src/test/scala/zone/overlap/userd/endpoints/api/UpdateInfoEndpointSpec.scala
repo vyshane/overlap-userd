@@ -7,7 +7,7 @@ import io.grpc.{Status, StatusRuntimeException}
 import monix.eval.Task
 import org.scalamock.scalatest.AsyncMockFactory
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
-import zone.overlap.api.user.{UpdateInfoRequest, UpdateInfoResponse}
+import zone.overlap.api.{UpdateInfoRequest, UpdateInfoResponse}
 import zone.overlap.userd.authentication.UserContext
 
 class UpdateInfoEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matchers with RecoverMethods {

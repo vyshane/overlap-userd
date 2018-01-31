@@ -7,8 +7,8 @@ import cats.data.ValidatedNel
 import cats.implicits._
 import io.grpc.Status
 import monix.eval.Task
-import zone.overlap.api.user.{SignUpRequest, UpdateInfoRequest}
-import zone.overlap.privateapi.user.FindUserByIdRequest
+import zone.overlap.api.{SignUpRequest, UpdateInfoRequest}
+import zone.overlap.privateapi.FindUserByIdRequest
 
 sealed trait RequestValidator {
 

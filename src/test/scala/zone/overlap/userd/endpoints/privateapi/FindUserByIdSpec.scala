@@ -9,7 +9,7 @@ import io.grpc.StatusRuntimeException
 import monix.eval.Task
 import org.scalamock.scalatest.AsyncMockFactory
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
-import zone.overlap.privateapi.user.{FindUserByIdRequest, User}
+import zone.overlap.privateapi.{FindUserByIdRequest, User}
 import zone.overlap.userd.persistence.UserRecord
 import zone.overlap.TestUtils._
 import zone.overlap.userd.endpoints.privateapi.FindUserByIdEndpoint._

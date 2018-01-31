@@ -4,14 +4,18 @@ package zone.overlap.userd.endpoints.api
 
 import java.time.Clock
 
-import com.coreos.dex.api.api.ApiGrpcMonix
+import com.coreos.dex.api.ApiGrpcMonix
 import monix.eval.Task
-import zone.overlap.api.user._
+import zone.overlap.api._
+import zone.overlap.internalapi.EmailDeliveryGrpcMonix.EmailDeliveryServiceStub
 import zone.overlap.userd.authentication.UserContextServerInterceptor
 import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence.UserRepository
 
-class PublicUserService(userRepository: UserRepository[_, _], dexStub: ApiGrpcMonix.DexStub, eventPublisher: EventPublisher)
+class PublicUserService(userRepository: UserRepository[_, _],
+                        dexStub: ApiGrpcMonix.DexStub,
+                        emailDeliveryStub: EmailDeliveryServiceStub,
+                        eventPublisher: EventPublisher)
     extends UserGrpcMonix.UserService {
 
   override def signUp(request: SignUpRequest): Task[SignUpResponse] = {

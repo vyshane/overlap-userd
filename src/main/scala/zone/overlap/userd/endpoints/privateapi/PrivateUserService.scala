@@ -2,7 +2,7 @@
 
 package zone.overlap.userd.endpoints.privateapi
 
-import zone.overlap.privateapi.user._
+import zone.overlap.privateapi._
 import zone.overlap.userd.persistence.UserRepository
 
 class PrivateUserService(userRepository: UserRepository[_, _]) extends UserGrpcMonix.UserService {

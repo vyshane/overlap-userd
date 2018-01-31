@@ -6,8 +6,8 @@ import java.time.{Clock, Instant}
 
 import com.google.protobuf.timestamp.Timestamp
 import monix.eval.Task
-import zone.overlap.api.user.{SignUpRequest, SignUpResponse}
-import zone.overlap.internalapi.events.user.UserSignedUp
+import zone.overlap.api.{SignUpRequest, SignUpResponse}
+import zone.overlap.internalapi.events.UserSignedUp
 import zone.overlap.userd.endpoints.TaskScheduling
 import zone.overlap.userd.persistence.UserRecord
 import zone.overlap.userd.validation.RequestValidator._

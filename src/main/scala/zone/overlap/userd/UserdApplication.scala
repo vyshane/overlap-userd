@@ -2,15 +2,16 @@
 
 package zone.overlap.userd
 
-import com.coreos.dex.api.api.ApiGrpcMonix
+import com.coreos.dex.api.ApiGrpcMonix
 import com.typesafe.config.ConfigFactory
 import io.getquill.{PostgresJdbcContext, SnakeCase}
 import io.grpc.netty.NettyServerBuilder
 import io.grpc.{ManagedChannelBuilder, ServerInterceptors}
 import io.prometheus.client.exporter.HTTPServer
 import org.slf4j.LoggerFactory
-import zone.overlap.api.user.UserGrpcMonix
-import zone.overlap.privateapi.user.{UserGrpcMonix => PrivateUserGrpcMonix}
+import zone.overlap.api.UserGrpcMonix
+import zone.overlap.internalapi.EmailDeliveryGrpcMonix
+import zone.overlap.privateapi.{UserGrpcMonix => PrivateUserGrpcMonix}
 import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence._
 import zone.overlap.userd.authentication.UserContextServerInterceptor
@@ -56,13 +57,22 @@ object UserdApplication {
 
     // Public user service
     lazy val publicUserService = {
-      val channel = ManagedChannelBuilder
-        .forAddress(config.getString("dex.host"), config.getInt("dex.port"))
-        .usePlaintext(true)
-        .build()
-      val dexStub = ApiGrpcMonix.stub(channel)
+      val dexStub = {
+        val channel = ManagedChannelBuilder
+          .forAddress(config.getString("dex.host"), config.getInt("dex.port"))
+          .usePlaintext(true)
+          .build()
+        ApiGrpcMonix.stub(channel)
+      }
+      val emaildStub = {
+        val channel = ManagedChannelBuilder
+          .forAddress(config.getString("emaild.host"), config.getInt("emaild.port"))
+          .usePlaintext(true)
+          .build()
+        EmailDeliveryGrpcMonix.stub(channel)
+      }
       UserGrpcMonix.bindService(
-        new PublicUserService(userRepository, dexStub, eventPublisher),
+        new PublicUserService(userRepository, dexStub, emaildStub, eventPublisher),
         monix.execution.Scheduler.global
       )
     }

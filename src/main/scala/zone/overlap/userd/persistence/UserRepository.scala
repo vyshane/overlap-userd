@@ -10,8 +10,8 @@ import io.getquill._
 import io.getquill.context.jdbc.JdbcContext
 import io.getquill.context.sql.idiom.SqlIdiom
 import monix.eval.Task
-import zone.overlap.privateapi.user.{User, UserStatus}
-import zone.overlap.api.user.{SignUpRequest, UpdateInfoRequest}
+import zone.overlap.privateapi.{User, UserStatus}
+import zone.overlap.api.{SignUpRequest, UpdateInfoRequest}
 import zone.overlap.userd.utils._
 
 import scala.util.{Failure, Success, Try}

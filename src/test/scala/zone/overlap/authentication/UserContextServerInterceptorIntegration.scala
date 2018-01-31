@@ -5,7 +5,7 @@ package zone.overlap.authentication
 import java.net.URI
 import java.util.UUID
 
-import com.coreos.dex.api.api.ApiGrpcMonix
+import com.coreos.dex.api.ApiGrpcMonix
 import com.github.javafaker.Faker
 import com.nimbusds.oauth2.sdk.auth.{ClientSecretBasic, Secret}
 import com.nimbusds.oauth2.sdk.id.ClientID
@@ -20,7 +20,19 @@ import monix.eval.Task
 import org.jsoup.{Connection, Jsoup}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import zone.overlap.docker.DockerDexService
-import zone.overlap.api.user.{ChangePasswordRequest, DeleteAccountRequest, ResendVerificationEmailRequest, SignUpRequest, SignUpResponse, UpdateEmailRequest, UpdateEmailResponse, UpdateInfoRequest, UpdateInfoResponse, VerifyEmailRequest, UserGrpcMonix => PublicUserGrpcMonix}
+import zone.overlap.api.{
+  ChangePasswordRequest,
+  DeleteAccountRequest,
+  ResendVerificationEmailRequest,
+  SignUpRequest,
+  SignUpResponse,
+  UpdateEmailRequest,
+  UpdateEmailResponse,
+  UpdateInfoRequest,
+  UpdateInfoResponse,
+  VerifyEmailRequest,
+  UserGrpcMonix => PublicUserGrpcMonix
+}
 import zone.overlap.userd.authentication.{IdTokenCallCredentials, UserContext, UserContextServerInterceptor}
 import zone.overlap.userd.endpoints.api.VerifyEmailEndpoint
 import zone.overlap.userd.utils._

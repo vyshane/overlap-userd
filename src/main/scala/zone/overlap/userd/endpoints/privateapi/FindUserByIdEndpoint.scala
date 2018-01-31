@@ -3,7 +3,7 @@
 package zone.overlap.userd.endpoints.privateapi
 
 import monix.eval.Task
-import zone.overlap.privateapi.user.{FindUserByIdRequest, FindUserByIdResponse}
+import zone.overlap.privateapi.{FindUserByIdRequest, FindUserByIdResponse}
 import zone.overlap.userd.persistence.UserRecord
 import zone.overlap.userd.validation.RequestValidator._
 

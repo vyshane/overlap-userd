@@ -8,7 +8,7 @@ import com.typesafe.config.Config
 import monix.eval.Task
 import org.apache.kafka.common.serialization.{ByteArraySerializer, StringSerializer}
 import org.slf4j.LoggerFactory
-import zone.overlap.internalapi.events.user.UserSignedUp
+import zone.overlap.internalapi.events.UserSignedUp
 
 import scala.util.{Failure, Success, Try}
 

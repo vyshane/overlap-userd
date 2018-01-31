@@ -8,7 +8,7 @@ import java.util.UUID
 import com.github.javafaker.Faker
 import com.trueaccord.scalapb.{GeneratedEnum, GeneratedEnumCompanion}
 import monix.eval.Task
-import zone.overlap.privateapi.user.UserStatus
+import zone.overlap.privateapi.UserStatus
 import zone.overlap.userd.persistence.UserRecord
 import zone.overlap.userd.utils._
 
