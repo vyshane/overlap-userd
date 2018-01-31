@@ -56,26 +56,24 @@ object UserdApplication {
     lazy val userContextServerInterceptor = UserContextServerInterceptor(config)
 
     // Public user service
-    lazy val publicUserService = {
-      val dexStub = {
-        val channel = ManagedChannelBuilder
-          .forAddress(config.getString("dex.host"), config.getInt("dex.port"))
-          .usePlaintext(true)
-          .build()
-        ApiGrpcMonix.stub(channel)
-      }
-      val emaildStub = {
-        val channel = ManagedChannelBuilder
-          .forAddress(config.getString("emaild.host"), config.getInt("emaild.port"))
-          .usePlaintext(true)
-          .build()
-        EmailDeliveryGrpcMonix.stub(channel)
-      }
-      UserGrpcMonix.bindService(
-        new PublicUserService(userRepository, dexStub, emaildStub, eventPublisher),
-        monix.execution.Scheduler.global
-      )
+    lazy val dexStub = {
+      val channel = ManagedChannelBuilder
+        .forAddress(config.getString("dex.host"), config.getInt("dex.port"))
+        .usePlaintext(true)
+        .build()
+      ApiGrpcMonix.stub(channel)
     }
+    lazy val emaildStub = {
+      val channel = ManagedChannelBuilder
+        .forAddress(config.getString("emaild.host"), config.getInt("emaild.port"))
+        .usePlaintext(true)
+        .build()
+      EmailDeliveryGrpcMonix.stub(channel)
+    }
+    lazy val publicUserService = UserGrpcMonix.bindService(
+      new PublicUserService(userRepository, dexStub, emaildStub, eventPublisher),
+      monix.execution.Scheduler.global
+    )
 
     // Private user service
     lazy val privateUserService = PrivateUserGrpcMonix.bindService(
