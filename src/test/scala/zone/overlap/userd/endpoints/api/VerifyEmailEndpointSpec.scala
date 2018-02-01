@@ -26,7 +26,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
   // Unit tests
   "The verifyEmail public endpoint" should provide {
     "an ensureUserExists method" which {
-      "raises as Task error if the user does not exist" in {
+      "raises an error if the user does not exist" in {
         recoverToExceptionIf[StatusRuntimeException] {
           ensureUserExists(None).runAsync
         } map { error =>
@@ -35,7 +35,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
         }
       }
     }
-    "wraps the UserRecord in a Task if the user exists " in {
+    "passes the UserRecord through if the user exists " in {
       val user = randomPendingUserRecord()
       ensureUserExists(Option(user)).runAsync map { u =>
         u shouldEqual user
@@ -56,7 +56,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
       }
     }
     "an ensureDexUserCreated method" which {
-      "raises a Task error if the user already exists in Dex" in {
+      "raises an error if the user already exists in Dex" in {
         recoverToExceptionIf[StatusRuntimeException] {
           ensureDexUserCreated(CreatePasswordResp(true)).runAsync
         } map { error =>
@@ -64,7 +64,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
           error.getMessage.contains("User already exists in auth service") shouldBe true
         }
       }
-      "returns the CreatePasswordResp wrapped in a Task if the Dex user was successfully created" in {
+      "passes the CreatePasswordResp through if the Dex user was successfully created" in {
         ensureDexUserCreated(CreatePasswordResp(false)).runAsync map { resp =>
           resp shouldEqual CreatePasswordResp(false)
         }

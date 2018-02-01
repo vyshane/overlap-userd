@@ -16,22 +16,22 @@ class ResendVerificationEmailEndpointSpec extends AsyncWordSpec with AsyncMockFa
   // Unit tests
   "The resendVerificationEmail public endpoint" should provide {
     "an ensureUserExists method" which {
-      "raises a Task error if the user does not exist" in (pending)
+      "raises an error if the user does not exist" in (pending)
     }
     "an ensureUserExists method" which {
-      "returns the user record wrapped in a Task if the user exists" in (pending)
+      "provides the user record if the user exists" in (pending)
     }
     "an ensurePendingEmailVerification method" which {
-      "raises a Task error if the user is not pending email verification" in (pending)
+      "raises an error if the user is not pending email verification" in (pending)
     }
     "an ensurePendingEmailVerification method" which {
-      "returns the user wrapped in a Task if the user is pending email verification" in (pending)
+      "passes the user record through if the user is pending email verification" in (pending)
     }
     "an assignEmailVerificationCodeIfNecessary method" which {
-      "returns the existing email verification code wrapped in a Task if the user has one" in (pending)
+      "returns the existing email verification code if the user has one" in (pending)
     }
     "an assignEmailVerificationCodeIfNecessary method" which {
-      "sets a new email verification code and returns the code wrapped in a Task if the user has none" in (pending)
+      "sets a new email verification code and returns it if the user has none" in (pending)
     }
     "a buildSendWelcomEmailRequest method" which {
       "returns an appropriate SendWelcomEmailRequest" in (pending)
