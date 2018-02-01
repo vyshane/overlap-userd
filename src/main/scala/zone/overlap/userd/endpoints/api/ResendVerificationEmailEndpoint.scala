@@ -5,29 +5,29 @@ package zone.overlap.userd.endpoints.api
 import io.grpc.Status
 import monix.eval.Task
 import zone.overlap.api.{ResendVerificationEmailRequest, ResendVerificationEmailResponse}
-import zone.overlap.internalapi.EmailDeliveryGrpcMonix.EmailDeliveryServiceStub
-import zone.overlap.internalapi.SendWelcomeEmailRequest
+import zone.overlap.internalapi.{SendWelcomeEmailRequest, SendWelcomeEmailResponse}
 import zone.overlap.privateapi.UserStatus
+import zone.overlap.userd.endpoints.TaskScheduling
 import zone.overlap.userd.persistence.{Email, UserRecord}
 import zone.overlap.userd.utils._
 
-object ResendVerificationEmailEndpoint {
+object ResendVerificationEmailEndpoint extends TaskScheduling {
 
   def resendVerificationEmail(findUserByEmail: String => Task[Option[UserRecord]],
                               verificationCodeUpdater: (Email, String) => Task[Unit],
-                              emailDeliveryStub: EmailDeliveryServiceStub)
+                              sendWelcomeEmail: SendWelcomeEmailRequest => Task[SendWelcomeEmailResponse])
                              (request: ResendVerificationEmailRequest): Task[ResendVerificationEmailResponse] = {
     for {
       user <- ensureUserExists(findUserByEmail)(request.email)
       _ <- ensurePendingEmailVerification(user)
       currentCode <- assignEmailVerificationCodeIfNecessary(randomUniqueCode, verificationCodeUpdater)(user)
       sendEmailRequest = buildSendWelcomEmailRequest(user, currentCode)
-      _ <- emailDeliveryStub.sendWelcomeEmail(sendEmailRequest)
+      _ <- sendWelcomeEmail(sendEmailRequest).executeOn(ioScheduler).asyncBoundary
     } yield ResendVerificationEmailResponse()
   }
 
   private[api] def ensureUserExists(findUserByEmail: Email => Task[Option[UserRecord]])(email: Email): Task[UserRecord] = {
-    findUserByEmail(email)
+    findUserByEmail(email).executeOn(ioScheduler).asyncBoundary
       .flatMap { user =>
         user
           .map(Task.now(_))
@@ -49,7 +49,7 @@ object ResendVerificationEmailEndpoint {
       .map(Task.now(_))
       .getOrElse {
         val newCode = randomUniqueCode()
-        updateCode(user.email, newCode).map(_ => newCode)
+        updateCode(user.email, newCode).map(_ => newCode).executeOn(ioScheduler).asyncBoundary
       }
   }
 
