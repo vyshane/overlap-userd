@@ -63,7 +63,7 @@ object UserdApplication {
         .build()
       ApiGrpcMonix.stub(channel)
     }
-    lazy val emaildStub = {
+    lazy val emailDeliveryStub = {
       val channel = ManagedChannelBuilder
         .forAddress(config.getString("emaild.host"), config.getInt("emaild.port"))
         .usePlaintext(true)
@@ -71,7 +71,7 @@ object UserdApplication {
       EmailDeliveryGrpcMonix.stub(channel)
     }
     lazy val publicUserService = UserGrpcMonix.bindService(
-      new PublicUserService(userRepository, dexStub, emaildStub, eventPublisher),
+      new PublicUserService(userRepository, dexStub, emailDeliveryStub, eventPublisher),
       monix.execution.Scheduler.global
     )
 

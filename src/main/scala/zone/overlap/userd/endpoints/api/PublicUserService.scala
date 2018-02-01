@@ -31,7 +31,11 @@ class PublicUserService(userRepository: UserRepository[_, _],
                                     userRepository.activateUser)(request)
   }
 
-  override def resendVerificationEmail(request: ResendVerificationEmailRequest) = ???
+  override def resendVerificationEmail(request: ResendVerificationEmailRequest) = {
+    ResendVerificationEmailEndpoint.resendVerificationEmail(userRepository.findUserByEmail,
+                                                            userRepository.updateEmailVerificationCode,
+                                                            emailDeliveryStub)(request)
+  }
 
   override def updateInfo(request: UpdateInfoRequest): Task[UpdateInfoResponse] = {
     UpdateInfoEndpoint.updateInfo(UserContextServerInterceptor.ensureAuthenticated, userRepository.updateUser)(request)
