@@ -6,7 +6,7 @@ import com.github.javafaker.Faker
 import org.scalamock.scalatest.AsyncMockFactory
 import org.scalatest.{AsyncWordSpec, FunSuite, Matchers, RecoverMethods}
 
-class ResendVerificationEmailEndpointTest extends AsyncWordSpec with AsyncMockFactory with Matchers with RecoverMethods {
+class ResendVerificationEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matchers with RecoverMethods {
 
   import monix.execution.Scheduler.Implicits.global
   private val faker = new Faker()
