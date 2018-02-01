@@ -34,7 +34,7 @@ object TestUtils {
     } else {
       var enum: T = randomEnum(enumCompanion)
       while (enum == except) enum = randomEnum(enumCompanion)
-      Option(enum)
+      Some(enum)
     }
   }
 
@@ -54,6 +54,6 @@ object TestUtils {
 
   def randomPendingUserRecord(): UserRecord = {
     randomVerifiedUserRecord()
-      .copy(status = UserStatus.PENDING_EMAIL_VERIFICATION.name, emailVerificationCode = Option(randomUniqueCode()))
+      .copy(status = UserStatus.PENDING_EMAIL_VERIFICATION.name, emailVerificationCode = Some(randomUniqueCode()))
   }
 }

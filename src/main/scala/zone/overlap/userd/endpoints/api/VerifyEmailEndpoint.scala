@@ -50,7 +50,7 @@ object VerifyEmailEndpoint extends TaskScheduling {
 
   def buildCreatePasswordReq(userId: String, displayName: String, email: String, passwordHash: String): CreatePasswordReq = {
     CreatePasswordReq(
-      Option(
+      Some(
         DexPassword(
           email,
           ByteString.copyFromUtf8(passwordHash),

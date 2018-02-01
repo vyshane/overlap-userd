@@ -36,7 +36,7 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
           signUpRequest.firstName,
           signUpRequest.lastName,
           signUpRequest.email,
-          Option(Timestamp(instant.getEpochSecond, instant.getNano))
+          Some(Timestamp(instant.getEpochSecond, instant.getNano))
         )
         buildUserSignedUpMessage(clock)(userId, signUpRequest) shouldEqual userSignedUpEvent
       }

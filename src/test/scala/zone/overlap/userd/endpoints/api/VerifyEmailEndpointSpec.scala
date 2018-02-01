@@ -49,7 +49,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
         val passwordHash = faker.lorem().word().toLowerCase()
 
         buildCreatePasswordReq(userId, username, email, passwordHash) shouldEqual CreatePasswordReq(
-          Option(
+          Some(
             Password(email, ByteString.copyFromUtf8(passwordHash), username, userId)
           )
         )
@@ -101,7 +101,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
     "sent a valid verification code but Dex registration fails because the user already exists in Dex" should {
       "not activate the user" in {
         val findUserByEmailVerificationCode = mockFunction[String, Task[Option[UserRecord]]]
-        findUserByEmailVerificationCode.expects(*).returning(Task.now(Option(randomPendingUserRecord())))
+        findUserByEmailVerificationCode.expects(*).returning(Task.now(Some(randomPendingUserRecord())))
 
         val registerUserWithDex = mockFunction[CreatePasswordReq, Task[CreatePasswordResp]]
         registerUserWithDex
@@ -127,7 +127,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
           .expects(where { verificationCode: String =>
             verificationCode == userRecord.emailVerificationCode.get
           })
-          .returning(Task.now(Option(userRecord)))
+          .returning(Task.now(Some(userRecord)))
 
         val registerUserWithDex = mockFunction[CreatePasswordReq, Task[CreatePasswordResp]]
         registerUserWithDex

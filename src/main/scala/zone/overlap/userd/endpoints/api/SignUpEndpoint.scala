@@ -35,7 +35,7 @@ object SignUpEndpoint extends TaskScheduling {
       signUpRequest.firstName,
       signUpRequest.lastName,
       signUpRequest.email,
-      Option(Timestamp(now.getEpochSecond, now.getNano))
+      Some(Timestamp(now.getEpochSecond, now.getNano))
     )
   }
 }

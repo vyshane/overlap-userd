@@ -54,7 +54,7 @@ class FindUserByIdSpec extends AsyncWordSpec with AsyncMockFactory with Matchers
         queryDatabase
           .expects(*)
           .once()
-          .returning(Task.now(Option(userRecord)))
+          .returning(Task.now(Some(userRecord)))
 
         findUserById(queryDatabase)(FindUserByIdRequest(userId)).runAsync map { response =>
           assertCorrectUserRecordConversion(userRecord, response.user.get)
