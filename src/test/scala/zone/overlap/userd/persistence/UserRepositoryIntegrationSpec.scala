@@ -49,7 +49,7 @@ class UserRepositoryIntegrationSpec
       "returns the user if the user exists" in {
         val user = randomVerifiedUserRecord()
         awaitResult(userRepository.createUser(user))
-        awaitResult(userRepository.findUserById(user.id)) shouldEqual Option(user)
+        awaitResult(userRepository.findUserById(user.id)) shouldEqual Some(user)
       }
     }
     "a findUserByEmail method" which {
@@ -59,7 +59,7 @@ class UserRepositoryIntegrationSpec
       "returns the user if the user exists" in {
         val user = randomVerifiedUserRecord()
         awaitResult(userRepository.createUser(user))
-        awaitResult(userRepository.findUserByEmail(user.email)) shouldEqual Option(user)
+        awaitResult(userRepository.findUserByEmail(user.email)) shouldEqual Some(user)
       }
     }
     "a findUserPendingEmailVerification method" which {
@@ -68,14 +68,14 @@ class UserRepositoryIntegrationSpec
         awaitResult(userRepository.findUserPendingEmailVerification(unknownEmail)) shouldEqual None
       }
       "returns an empty Option if the user exists but is not pending email verification" in {
-        val user = randomVerifiedUserRecord().copy(emailVerificationCode = Option(randomUniqueCode()))
+        val user = randomVerifiedUserRecord().copy(emailVerificationCode = Some(randomUniqueCode()))
         awaitResult(userRepository.createUser(user))
         awaitResult(userRepository.findUserPendingEmailVerification(user.emailVerificationCode.get)) shouldEqual None
       }
       "returns the user if a user with the email verification code was found and the user is pending email verification" in {
         val user = randomPendingUserRecord()
         awaitResult(userRepository.createUser(user))
-        awaitResult(userRepository.findUserPendingEmailVerification(user.emailVerificationCode.get)) shouldEqual Option(user)
+        awaitResult(userRepository.findUserPendingEmailVerification(user.emailVerificationCode.get)) shouldEqual Some(user)
       }
     }
     "an activateUser method" which {
@@ -127,6 +127,15 @@ class UserRepositoryIntegrationSpec
         awaitResult(userRepository.createUser(user))
         awaitResult(userRepository.updateUserStatus(user.email, UserStatus.SUSPENDED))
         awaitResult(userRepository.findUserByEmail(user.email)).get.status shouldEqual UserStatus.SUSPENDED.name
+      }
+    }
+    "an updateEmailVerificationCode method" which {
+      "updates the user's email verification code" in {
+        val user = randomVerifiedUserRecord()
+        awaitResult(userRepository.createUser(user))
+        val newCode = randomUniqueCode()
+        awaitResult(userRepository.updateEmailVerificationCode(user.email, newCode))
+        awaitResult(userRepository.findUserByEmail(user.email)).get.emailVerificationCode.get shouldEqual newCode
       }
     }
     "a canQueryDatabase method" which {

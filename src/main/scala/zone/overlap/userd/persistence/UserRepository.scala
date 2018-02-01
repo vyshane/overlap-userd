@@ -19,7 +19,7 @@ import scala.util.{Failure, Success, Try}
 case class UserRecord(id: String,
                       firstName: String,
                       lastName: String,
-                      email: String,
+                      email: Email,
                       emailVerificationCode: Option[String],
                       passwordHash: String,
                       status: String, // TODO(SX) We should use the UserStatus type
@@ -31,7 +31,7 @@ case class UserRecord(id: String,
     lastName,
     email,
     UserStatus.fromName(status).get,
-    Option(Timestamp(signedUp.getEpochSecond, signedUp.getNano))
+    Some(Timestamp(signedUp.getEpochSecond, signedUp.getNano))
   )
 }
 
@@ -53,7 +53,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     Task(context.run(q).headOption)
   }
 
-  def findUserByEmail(email: String): Task[Option[UserRecord]] = {
+  def findUserByEmail(email: Email): Task[Option[UserRecord]] = {
     val q = quote {
       users.filter(_.email == lift(email))
     }
@@ -69,7 +69,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
   }
 
   // Also clears the email verification code
-  def activateUser(email: String): Task[Unit] = {
+  def activateUser(email: Email): Task[Unit] = {
     val q = quote {
       users
         .filter(_.email == lift(email))
@@ -89,7 +89,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
         signUpRequest.firstName,
         signUpRequest.lastName,
         signUpRequest.email,
-        Option(randomUniqueCode()),
+        Some(randomUniqueCode()),
         hashPassword(signUpRequest.password), // TODO: Is there a way to store passwords in Dex only?
         UserStatus.PENDING_EMAIL_VERIFICATION.name,
         Instant.now()
@@ -104,7 +104,7 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     Task(context.run(q))
   }
 
-  def updateUser(currentEmail: String, updateInfoRequest: UpdateInfoRequest): Task[Unit] = {
+  def updateUser(currentEmail: Email, updateInfoRequest: UpdateInfoRequest): Task[Unit] = {
     val q = quote {
       users
         .filter(_.email == lift(currentEmail))
@@ -116,12 +116,23 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     Task(context.run(q))
   }
 
-  def updateUserStatus(email: String, userStatus: UserStatus): Task[Unit] = {
+  def updateUserStatus(email: Email, userStatus: UserStatus): Task[Unit] = {
     val q = quote {
       users
         .filter(_.email == lift(email))
         .update(
           _.status -> lift(userStatus.name)
+        )
+    }
+    Task(context.run(q))
+  }
+
+  def updateEmailVerificationCode(email: Email, emailVerificationCode: String): Task[Unit] = {
+    val q = quote {
+      users
+        .filter(_.email == lift(email))
+        .update(
+          _.emailVerificationCode -> lift(Option[String](emailVerificationCode))
         )
     }
     Task(context.run(q))
