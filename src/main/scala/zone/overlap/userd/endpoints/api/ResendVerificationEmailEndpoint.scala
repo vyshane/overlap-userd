@@ -18,30 +18,33 @@ object ResendVerificationEmailEndpoint {
                               emailDeliveryStub: EmailDeliveryServiceStub)
                              (request: ResendVerificationEmailRequest): Task[ResendVerificationEmailResponse] = {
     for {
-      possibleUser <- findUserByEmail(request.email)
-      user <- ensureUserExists(possibleUser)
+      user <- ensureUserExists(findUserByEmail)(request.email)
       _ <- ensurePendingEmailVerification(user)
       currentCode <- assignEmailVerificationCodeIfNecessary(randomUniqueCode, verificationCodeUpdater)(user)
-      sendWelcomEmailRequest = buildSendWelcomEmailRequest(user, currentCode)
-      _ <- emailDeliveryStub.sendWelcomeEmail(sendWelcomEmailRequest)
+      sendEmailRequest = buildSendWelcomEmailRequest(user, currentCode)
+      _ <- emailDeliveryStub.sendWelcomeEmail(sendEmailRequest)
     } yield ResendVerificationEmailResponse()
   }
 
-  def ensureUserExists(user: Option[UserRecord]): Task[UserRecord] = {
-    user
-      .map(Task.now(_))
-      .getOrElse(Task.raiseError(Status.NOT_FOUND.augmentDescription("Email not found").asRuntimeException()))
+  private[api] def ensureUserExists(findUserByEmail: Email => Task[Option[UserRecord]])(email: Email): Task[UserRecord] = {
+    findUserByEmail(email)
+      .flatMap { user =>
+        user
+          .map(Task.now(_))
+          .getOrElse(Task.raiseError(Status.NOT_FOUND.augmentDescription("Email not found").asRuntimeException()))
+      }
   }
 
-  def ensurePendingEmailVerification(user: UserRecord): Task[UserRecord] = {
+  private[api] def ensurePendingEmailVerification(user: UserRecord): Task[UserRecord] = {
     if (user.status != UserStatus.PENDING_EMAIL_VERIFICATION)
       Task.raiseError(Status.NOT_FOUND.augmentDescription("Email already verified").asRuntimeException())
     else
       Task.now(user)
   }
 
-  def assignEmailVerificationCodeIfNecessary(codeGenerator: () => String, updateCode: (Email, String) => Task[Unit])
-                                            (user: UserRecord): Task[String] = {
+  private[api] def assignEmailVerificationCodeIfNecessary(codeGenerator: () => String,
+                                                          updateCode: (Email, String) => Task[Unit])
+                                                         (user: UserRecord): Task[String] = {
     user.emailVerificationCode
       .map(Task.now(_))
       .getOrElse {
@@ -50,7 +53,7 @@ object ResendVerificationEmailEndpoint {
       }
   }
 
-  def buildSendWelcomEmailRequest(user: UserRecord, currentCode: String): SendWelcomeEmailRequest = {
+  private[api] def buildSendWelcomEmailRequest(user: UserRecord, currentCode: String): SendWelcomeEmailRequest = {
     SendWelcomeEmailRequest(user.firstName, user.lastName, user.email, currentCode)
   }
 }
