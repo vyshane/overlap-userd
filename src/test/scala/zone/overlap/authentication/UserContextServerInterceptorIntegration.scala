@@ -101,7 +101,7 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
           val updateInfo = mockUserServiceStub.updateInfo(UpdateInfoRequest()).runAsync
           Await.result(updateInfo, 5 seconds)
         }
-        error.getStatus shouldEqual Status.UNAUTHENTICATED
+        error.getStatus.getCode shouldEqual Status.UNAUTHENTICATED.getCode
       }
     }
     "intercepting an authenticated call" should {
@@ -211,7 +211,7 @@ class UserContextServerInterceptorIntegration extends WordSpec with Matchers wit
       UserContextServerInterceptor
         .ensureAuthenticated()
         .flatMap { userContext =>
-          if (validUserContext(userContext)) Task(UpdateInfoResponse())
+          if (validUserContext(userContext)) Task.now(UpdateInfoResponse())
           else Task.raiseError(Status.UNAUTHENTICATED.asRuntimeException())
         }
     }

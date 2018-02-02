@@ -9,7 +9,7 @@ import cats.implicits._
 import com.github.javafaker.Faker
 import io.grpc.{Status, StatusRuntimeException}
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
-import zone.overlap.api.{SignUpRequest, UpdateInfoRequest}
+import zone.overlap.api.{ResendVerificationEmailRequest, SignUpRequest, UpdateInfoRequest}
 import zone.overlap.privateapi.FindUserByIdRequest
 import zone.overlap.userd.validation.RequestValidator._
 
@@ -44,6 +44,17 @@ class RequestValidatorSpec extends AsyncWordSpec with Matchers with RecoverMetho
       "returns the validated value if validation succeeds" in {
         val request = FindUserByIdRequest(UUID.randomUUID().toString)
         validateFindUserByIdRequest(request) shouldEqual request.valid
+      }
+    }
+    "a validateResendVerificationEmailRequest function" which {
+      "returns a validation error if validation fails" in {
+        validateResendVerificationEmailRequest(ResendVerificationEmailRequest()) should matchPattern {
+          case Invalid(_) =>
+        }
+      }
+      "returns the validated value if validation succeeds" in {
+        val request = ResendVerificationEmailRequest(faker.internet().emailAddress())
+        validateResendVerificationEmailRequest(request) shouldEqual request.valid
       }
     }
     "a validateSignUpRequest function" which {
@@ -106,25 +117,25 @@ class RequestValidatorSpec extends AsyncWordSpec with Matchers with RecoverMetho
         validateFirstName(lastName) shouldEqual lastName.valid
       }
     }
-    "a validateEmail function" which {
+    "a validateUniqueEmail function" which {
       "returns a validation error if the email is empty" in {
-        validateEmail(_ => false)("") should matchPattern {
+        validateUniqueEmail(_ => false)("") should matchPattern {
           case Invalid(_) =>
         }
       }
       "returns a validation error if the email format is invalid" in {
-        validateEmail(_ => false)("bad@") should matchPattern {
+        validateUniqueEmail(_ => false)("bad@") should matchPattern {
           case Invalid(_) =>
         }
       }
       "returns a validation error if the email is already taken" in {
-        validateEmail(_ => true)(faker.internet().emailAddress()) should matchPattern {
+        validateUniqueEmail(_ => true)(faker.internet().emailAddress()) should matchPattern {
           case Invalid(_) =>
         }
       }
       "returns the validated value if validation succeeds" in {
         val email = faker.internet().emailAddress()
-        validateEmail(_ => false)(email) shouldEqual email.valid
+        validateUniqueEmail(_ => false)(email) shouldEqual email.valid
       }
     }
     "a validatePassword function" which {

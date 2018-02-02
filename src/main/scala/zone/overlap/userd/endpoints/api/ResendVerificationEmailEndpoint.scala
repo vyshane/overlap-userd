@@ -10,14 +10,16 @@ import zone.overlap.privateapi.UserStatus
 import zone.overlap.userd.endpoints.TaskScheduling
 import zone.overlap.userd.persistence.{Email, UserRecord}
 import zone.overlap.userd.utils._
+import zone.overlap.userd.validation.RequestValidator._
 
 object ResendVerificationEmailEndpoint extends TaskScheduling {
 
-  def resendVerificationEmail(findUserByEmail: String => Task[Option[UserRecord]],
+  def resendVerificationEmail(findUserByEmail: Email => Task[Option[UserRecord]],
                               verificationCodeUpdater: (Email, String) => Task[Unit],
                               sendWelcomeEmail: SendWelcomeEmailRequest => Task[SendWelcomeEmailResponse])
                              (request: ResendVerificationEmailRequest): Task[ResendVerificationEmailResponse] = {
     for {
+      _ <- ensureValid(validateResendVerificationEmailRequest)(request)
       user <- ensureUserExists(findUserByEmail)(request.email)
       _ <- ensurePendingEmailVerification(user)
       currentCode <- assignEmailVerificationCodeIfNecessary(randomUniqueCode, verificationCodeUpdater)(user)
@@ -36,8 +38,9 @@ object ResendVerificationEmailEndpoint extends TaskScheduling {
   }
 
   private[api] def ensurePendingEmailVerification(user: UserRecord): Task[UserRecord] = {
-    if (user.status != UserStatus.PENDING_EMAIL_VERIFICATION)
-      Task.raiseError(Status.NOT_FOUND.augmentDescription("Email already verified").asRuntimeException())
+    if (user.status != UserStatus.PENDING_EMAIL_VERIFICATION.name)
+      Task.raiseError(
+        Status.INVALID_ARGUMENT.augmentDescription("Email has already been already verified").asRuntimeException())
     else
       Task.now(user)
   }
@@ -48,12 +51,12 @@ object ResendVerificationEmailEndpoint extends TaskScheduling {
     user.emailVerificationCode
       .map(Task.now(_))
       .getOrElse {
-        val newCode = randomUniqueCode()
+        val newCode = codeGenerator()
         updateCode(user.email, newCode).map(_ => newCode).executeOn(ioScheduler).asyncBoundary
       }
   }
 
-  private[api] def buildSendWelcomEmailRequest(user: UserRecord, currentCode: String): SendWelcomeEmailRequest = {
-    SendWelcomeEmailRequest(user.firstName, user.lastName, user.email, currentCode)
+  private[api] def buildSendWelcomEmailRequest(user: UserRecord, verificationCode: String): SendWelcomeEmailRequest = {
+    SendWelcomeEmailRequest(user.firstName, user.lastName, user.email, verificationCode)
   }
 }

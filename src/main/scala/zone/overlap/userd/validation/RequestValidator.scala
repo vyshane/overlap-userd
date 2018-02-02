@@ -7,7 +7,7 @@ import cats.data.ValidatedNel
 import cats.implicits._
 import io.grpc.Status
 import monix.eval.Task
-import zone.overlap.api.{SignUpRequest, UpdateInfoRequest}
+import zone.overlap.api.{ResendVerificationEmailRequest, SignUpRequest, UpdateInfoRequest}
 import zone.overlap.privateapi.FindUserByIdRequest
 
 sealed trait RequestValidator {
@@ -28,10 +28,15 @@ sealed trait RequestValidator {
     else request.valid
   }
 
+  def validateResendVerificationEmailRequest(
+      request: ResendVerificationEmailRequest): ValidationResult[ResendVerificationEmailRequest] = {
+    validateEmail(request.email).map(_ => request)
+  }
+
   def validateSignUpRequest(emailExists: String => Boolean)(request: SignUpRequest): ValidationResult[SignUpRequest] = {
     (validateFirstName(request.firstName),
      validateLastName(request.lastName),
-     validateEmail(emailExists)(request.email),
+     validateUniqueEmail(emailExists)(request.email),
      validatePassword(request.password)).mapN(SignUpRequest.apply)
   }
 
@@ -47,11 +52,16 @@ sealed trait RequestValidator {
     if (lastName.length > 1 && lastName.length <= 255) lastName.validNel
     else LastNameIsInvalid.invalidNel
 
-  private[validation] def validateEmail(emailExists: String => Boolean)(email: String): ValidationResult[String] =
+  private[validation] def validateEmail(email: String): ValidationResult[String] =
     if (email.isEmpty) EmailIsRequired.invalidNel
     else if (!validateEmailFormat(email)) EmailIsInvalid.invalidNel
-    else if (emailExists(email)) EmailIsTaken.invalidNel
     else email.validNel
+
+  private[validation] def validateUniqueEmail(emailExists: String => Boolean)(email: String): ValidationResult[String] =
+    validateEmail(email) andThen { email =>
+      if (emailExists(email)) EmailIsTaken.invalidNel
+      else email.validNel
+    }
 
   private def validateEmailFormat(email: String): Boolean = {
     // Regex source: https://www.w3.org/TR/html5/forms.html#valid-e-mail-address
