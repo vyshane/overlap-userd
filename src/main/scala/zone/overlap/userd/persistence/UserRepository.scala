@@ -138,6 +138,13 @@ case class UserRepository[Dialect <: SqlIdiom, Naming <: NamingStrategy](
     Task(context.run(q))
   }
 
+  def deleteUser(email: Email): Task[Unit] = {
+    val q = quote {
+      users.filter(_.email == lift(email)).delete
+    }
+    Task(context.run(q))
+  }
+
   // Simple blocking health check. Can we query the users database table?
   def canQueryUsers(): Boolean = {
     Try(

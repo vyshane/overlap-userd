@@ -138,6 +138,14 @@ class UserRepositoryIntegrationSpec
         awaitResult(userRepository.findUserByEmail(user.email)).get.emailVerificationCode.get shouldEqual newCode
       }
     }
+    "a deleteUser method" which {
+      "deletes the user" in {
+        val user = randomVerifiedUserRecord()
+        awaitResult(userRepository.createUser(user))
+        awaitResult(userRepository.deleteUser(user.email))
+        awaitResult(userRepository.findUserByEmail(user.email)) shouldEqual None
+      }
+    }
     "a canQueryDatabase method" which {
       "returns true if we can query the users database table" in {
         userRepository.canQueryUsers() shouldBe true
