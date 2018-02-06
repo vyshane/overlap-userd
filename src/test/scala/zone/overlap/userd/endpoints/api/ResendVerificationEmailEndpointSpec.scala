@@ -129,7 +129,7 @@ class ResendVerificationEmailEndpointSpec extends AsyncWordSpec with AsyncMockFa
           })
           .returning(Task.now(SendWelcomeEmailResponse()))
 
-        resendVerificationEmail(findUserByEmail, codeUpdater, emailSender)(ResendVerificationEmailRequest(email)).runAsync
+        handle(findUserByEmail, codeUpdater, emailSender)(ResendVerificationEmailRequest(email)).runAsync
           .map(_ shouldEqual ResendVerificationEmailResponse())
       }
     }

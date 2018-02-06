@@ -55,7 +55,7 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
 
         recoverToExceptionIf[StatusRuntimeException] {
           SignUpEndpoint
-            .signUp(_ => Task.now(None), createUser, sendNotification, Clock.systemUTC())(SignUpRequest())
+            .handle(_ => Task.now(None), createUser, sendNotification, Clock.systemUTC())(SignUpRequest())
             .runAsync
         } map { error =>
           error.getStatus.getCode shouldEqual Status.INVALID_ARGUMENT.getCode
@@ -95,7 +95,7 @@ class SignUpEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matche
           .returning(Task(()))
 
         SignUpEndpoint
-          .signUp(findUserByEmail, createUser, sendNotification, clock)(signUpRequest)
+          .handle(findUserByEmail, createUser, sendNotification, clock)(signUpRequest)
           .runAsync
           .map { response =>
             response shouldEqual SignUpResponse()

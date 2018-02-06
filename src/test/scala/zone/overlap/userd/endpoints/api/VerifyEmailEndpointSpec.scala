@@ -92,7 +92,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
         activateUser.expects(*).never()
 
         recoverToExceptionIf[StatusRuntimeException] {
-          verifyEmail(findUserByEmailVerificationCode, registerUserWithDex, activateUser)(VerifyEmailRequest()) runAsync
+          handle(findUserByEmailVerificationCode, registerUserWithDex, activateUser)(VerifyEmailRequest()) runAsync
         } map { error =>
           error.getStatus.getCode shouldEqual Status.INVALID_ARGUMENT.getCode
         }
@@ -113,7 +113,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
         activateUser.expects(*).never()
 
         recoverToExceptionIf[StatusRuntimeException] {
-          verifyEmail(findUserByEmailVerificationCode, registerUserWithDex, activateUser)(VerifyEmailRequest()).runAsync
+          handle(findUserByEmailVerificationCode, registerUserWithDex, activateUser)(VerifyEmailRequest()).runAsync
         } map { error =>
           error.getStatus.getCode shouldEqual Status.ABORTED.getCode
         }
@@ -146,7 +146,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
           .returning(Task.now(()))
 
         val request = VerifyEmailRequest(userRecord.emailVerificationCode.get)
-        verifyEmail(findUserByEmailVerificationCode, registerUserWithDex, activateUser)(request).runAsync
+        handle(findUserByEmailVerificationCode, registerUserWithDex, activateUser)(request).runAsync
           .map(_ shouldEqual VerifyEmailResponse())
       }
     }

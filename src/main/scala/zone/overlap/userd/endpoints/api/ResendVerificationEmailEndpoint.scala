@@ -14,10 +14,10 @@ import zone.overlap.userd.validation.RequestValidator._
 
 object ResendVerificationEmailEndpoint extends TaskScheduling {
 
-  def resendVerificationEmail(findUserByEmail: Email => Task[Option[UserRecord]],
-                              verificationCodeUpdater: (Email, String) => Task[Unit],
-                              sendWelcomeEmail: SendWelcomeEmailRequest => Task[SendWelcomeEmailResponse])
-                             (request: ResendVerificationEmailRequest): Task[ResendVerificationEmailResponse] = {
+  def handle(findUserByEmail: Email => Task[Option[UserRecord]],
+             verificationCodeUpdater: (Email, String) => Task[Unit],
+             sendWelcomeEmail: SendWelcomeEmailRequest => Task[SendWelcomeEmailResponse])
+            (request: ResendVerificationEmailRequest): Task[ResendVerificationEmailResponse] = {
     for {
       _ <- ensureValid(validateResendVerificationEmailRequest)(request)
       user <- ensureUserExists(findUserByEmail)(request.email)

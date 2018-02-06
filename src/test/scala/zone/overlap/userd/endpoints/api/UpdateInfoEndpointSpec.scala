@@ -25,7 +25,7 @@ class UpdateInfoEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Ma
 
         recoverToExceptionIf[StatusRuntimeException] {
           UpdateInfoEndpoint
-            .updateInfo(ensureAuthenticated, updateUser)(UpdateInfoRequest())
+            .handle(ensureAuthenticated, updateUser)(UpdateInfoRequest())
             .runAsync
         } map { error =>
           error.getStatus.getCode shouldEqual Status.UNAUTHENTICATED.getCode
@@ -41,7 +41,7 @@ class UpdateInfoEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Ma
 
         recoverToExceptionIf[StatusRuntimeException] {
           UpdateInfoEndpoint
-            .updateInfo(ensureAuthenticated, updateUser)(UpdateInfoRequest())
+            .handle(ensureAuthenticated, updateUser)(UpdateInfoRequest())
             .runAsync
         } map { error =>
           error.getStatus.getCode shouldEqual Status.INVALID_ARGUMENT.getCode
@@ -65,7 +65,7 @@ class UpdateInfoEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Ma
           .returning(Task.now(()))
 
         UpdateInfoEndpoint
-          .updateInfo(ensureAuthenticated, updateUser)(updateInfoRequest)
+          .handle(ensureAuthenticated, updateUser)(updateInfoRequest)
           .runAsync
           .map { response =>
             response shouldEqual UpdateInfoResponse()

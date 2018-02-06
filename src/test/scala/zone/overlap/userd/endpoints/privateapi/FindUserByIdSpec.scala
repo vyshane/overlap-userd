@@ -9,7 +9,6 @@ import io.grpc.StatusRuntimeException
 import monix.eval.Task
 import org.scalamock.scalatest.AsyncMockFactory
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
-import zone.overlap.privateapi.{FindUserByIdRequest, User}
 import zone.overlap.userd.persistence.UserRecord
 import zone.overlap.TestUtils._
 import zone.overlap.userd.endpoints.privateapi.FindUserByIdEndpoint._
@@ -27,7 +26,7 @@ class FindUserByIdSpec extends AsyncWordSpec with AsyncMockFactory with Matchers
         queryDatabase.expects(*).never()
 
         recoverToExceptionIf[StatusRuntimeException] {
-          findUserById(queryDatabase)(FindUserByIdRequest.defaultInstance).runAsync
+          handle(queryDatabase)(FindUserByIdRequest.defaultInstance).runAsync
         } map { error =>
           error.getMessage.contains("User ID is required") shouldBe true
         }
@@ -41,7 +40,7 @@ class FindUserByIdSpec extends AsyncWordSpec with AsyncMockFactory with Matchers
           .once()
           .returning(Task.now(None))
 
-        findUserById(queryDatabase)(FindUserByIdRequest(UUID.randomUUID().toString)).runAsync map { response =>
+        handle(queryDatabase)(FindUserByIdRequest(UUID.randomUUID().toString)).runAsync map { response =>
           response.user.isEmpty shouldBe true
         }
       }
@@ -56,7 +55,7 @@ class FindUserByIdSpec extends AsyncWordSpec with AsyncMockFactory with Matchers
           .once()
           .returning(Task.now(Some(userRecord)))
 
-        findUserById(queryDatabase)(FindUserByIdRequest(userId)).runAsync map { response =>
+        handle(queryDatabase)(FindUserByIdRequest(userId)).runAsync map { response =>
           assertCorrectUserRecordConversion(userRecord, response.user.get)
         }
       }

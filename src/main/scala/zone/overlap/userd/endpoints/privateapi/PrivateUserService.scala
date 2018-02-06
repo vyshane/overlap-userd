@@ -8,7 +8,7 @@ import zone.overlap.userd.persistence.UserRepository
 class PrivateUserService(userRepository: UserRepository[_, _]) extends UserGrpcMonix.UserService {
 
   override def findUserById(request: FindUserByIdRequest) =
-    FindUserByIdEndpoint.findUserById(userRepository.findUserById)(request)
+    FindUserByIdEndpoint.handle(userRepository.findUserById)(request)
 
   override def findUsers(request: FindUsersRequest) = ???
 

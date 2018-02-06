@@ -9,8 +9,8 @@ import zone.overlap.userd.validation.RequestValidator._
 
 object FindUserByIdEndpoint {
 
-  def findUserById(queryDatabase: String => Task[Option[UserRecord]])
-                  (request: FindUserByIdRequest): Task[FindUserByIdResponse] = {
+  def handle(queryDatabase: String => Task[Option[UserRecord]])
+            (request: FindUserByIdRequest): Task[FindUserByIdResponse] = {
     for {
       _ <- ensureValid(validateFindUserByIdRequest)(request)
       userRecord <- queryDatabase(request.userId)
