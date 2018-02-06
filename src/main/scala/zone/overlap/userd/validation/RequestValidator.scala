@@ -7,7 +7,7 @@ import cats.data.ValidatedNel
 import cats.implicits._
 import io.grpc.Status
 import monix.eval.Task
-import zone.overlap.api.{ResendVerificationEmailRequest, SignUpRequest, UpdateInfoRequest}
+import zone.overlap.api.{DeleteAccountRequest, ResendVerificationEmailRequest, SignUpRequest, UpdateInfoRequest}
 import zone.overlap.privateapi.FindUserByIdRequest
 
 sealed trait RequestValidator {
@@ -22,6 +22,10 @@ sealed trait RequestValidator {
         Task.raiseError(Status.INVALID_ARGUMENT.augmentDescription(errorDescription).asRuntimeException())
       }
     }
+
+  def validateDeleteAccountRequest(request: DeleteAccountRequest): ValidationResult[DeleteAccountRequest] = {
+    (validateEmail(request.email), validatePassword(request.password)).mapN(DeleteAccountRequest.apply)
+  }
 
   def validateFindUserByIdRequest(request: FindUserByIdRequest): ValidationResult[FindUserByIdRequest] = {
     if (request.userId.isEmpty) UserIdIsRequired.invalidNel

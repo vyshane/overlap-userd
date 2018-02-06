@@ -8,7 +8,7 @@ import com.typesafe.config.Config
 import monix.eval.Task
 import org.apache.kafka.common.serialization.{ByteArraySerializer, StringSerializer}
 import org.slf4j.LoggerFactory
-import zone.overlap.internalapi.events.UserSignedUp
+import zone.overlap.internalapi.events.{AccountDeleted, UserSignedUp}
 
 import scala.util.{Failure, Success, Try}
 
@@ -30,6 +30,18 @@ case class EventPublisher(config: Config) {
         case Success(_)     => ()
         case Failure(error) => log.error("Error publishing UserSignedUp event", error)
     }))
+  }
+
+  def sendAccountDeleted(accountDeleted: AccountDeleted): Task[Unit] = {
+    val record =
+      KafkaProducerRecord(config.getString("kafka.topic.events.AccountDeleted"),
+        Some(accountDeleted.userId),
+        accountDeleted.toByteArray)
+    Task(producer.sendWithCallback(record)(recordMetadata =>
+      recordMetadata match {
+        case Success(_)     => ()
+        case Failure(error) => log.error("Error publishing AccountDeleted event", error)
+      }))
   }
 
   def canQueryTopicPartitions(): Boolean = {

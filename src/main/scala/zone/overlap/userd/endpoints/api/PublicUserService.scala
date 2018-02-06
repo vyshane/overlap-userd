@@ -43,7 +43,16 @@ class PublicUserService(userRepository: UserRepository[_, _],
 
   override def updateEmail(request: UpdateEmailRequest): Task[UpdateEmailResponse] = ???
 
-  override def changePassword(request: ChangePasswordRequest) = ???
+  override def changePassword(request: ChangePasswordRequest): Task[ChangePasswordResponse] = ???
 
-  override def deleteAccount(request: DeleteAccountRequest) = ??? // TODO
+  override def deleteAccount(request: DeleteAccountRequest): Task[DeleteAccountResponse] = {
+    DeleteAccountEndpoint.handle(
+      UserContextServerInterceptor.ensureAuthenticated,
+      userRepository.findUserByEmail,
+      userRepository.deleteUser,
+      dexStub.deletePassword,
+      eventPublisher.sendAccountDeleted,
+      Clock.systemUTC()
+    )(request)
+  }
 }
