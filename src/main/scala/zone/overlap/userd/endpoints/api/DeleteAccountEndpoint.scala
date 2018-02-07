@@ -18,22 +18,23 @@ import zone.overlap.userd.utils._
 
 object DeleteAccountEndpoint extends TaskScheduling {
 
-  def handle(ensureAuthenticated: () => Task[UserContext],
-             findUserByEmail: Email => Task[Option[UserRecord]],
-             deleteUser: Email => Task[Unit],
-             unregisterFromDex: DeletePasswordReq => Task[DeletePasswordResp],
-             notifyAccountDeleted: AccountDeleted => Task[Unit],
-             clock: Clock)
-            (request: DeleteAccountRequest): Task[DeleteAccountResponse] = {
+  def handle(
+      ensureAuthenticated: () => Task[UserContext],
+      findUserByEmail: Email => Task[Option[UserRecord]],
+      deleteUser: Email => Task[Unit],
+      unregisterFromDex: DeletePasswordReq => Task[DeletePasswordResp],
+      notifyAccountDeleted: AccountDeleted => Task[Unit],
+      clock: Clock
+  )(request: DeleteAccountRequest): Task[DeleteAccountResponse] = {
     for {
       userContext <- ensureAuthenticated()
       _ <- ensureValid(validateDeleteAccountRequest)(request)
       user <- ensureUserExists(findUserByEmail)(userContext.email)
       _ <- ensureValidCredentials(request, user)
-      response <- deleteUser(userContext.email).executeOn(ioScheduler).asyncBoundary
+      response <- deleteUser(userContext.email).executeOn(ioScheduler)
       _ <- unregisterFromDex(DeletePasswordReq(request.email))
       event = buildAccountDeletedEvent(clock)(user)
-      _ <- notifyAccountDeleted(event)
+      _ <- notifyAccountDeleted(event).asyncBoundary
     } yield DeleteAccountResponse()
   }
 
