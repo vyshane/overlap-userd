@@ -19,26 +19,35 @@ class PublicUserService(userRepository: UserRepository[_, _],
     extends UserGrpcMonix.UserService {
 
   override def signUp(request: SignUpRequest): Task[SignUpResponse] = {
-    SignUpEndpoint.handle(userRepository.findUserByEmail,
-                          userRepository.createUser,
-                          eventPublisher.sendUserSignedUp,
-                          Clock.systemUTC())(request)
+    SignUpEndpoint.handle(
+      userRepository.findUserByEmail,
+      userRepository.createUser,
+      eventPublisher.sendUserSignedUp,
+      Clock.systemUTC()
+    )(request)
   }
 
   override def verifyEmail(request: VerifyEmailRequest): Task[VerifyEmailResponse] = {
-    VerifyEmailEndpoint.handle(userRepository.findUserPendingEmailVerification,
-                               dexStub.createPassword,
-                               userRepository.activateUser)(request)
+    VerifyEmailEndpoint.handle(
+      userRepository.findUserPendingEmailVerification,
+      dexStub.createPassword,
+      userRepository.activateUser
+    )(request)
   }
 
   override def resendVerificationEmail(request: ResendVerificationEmailRequest) = {
-    ResendVerificationEmailEndpoint.handle(userRepository.findUserByEmail,
-                                           userRepository.updateEmailVerificationCode,
-                                           emailDeliveryStub.sendWelcomeEmail)(request)
+    ResendVerificationEmailEndpoint.handle(
+      userRepository.findUserByEmail,
+      userRepository.updateEmailVerificationCode,
+      emailDeliveryStub.sendWelcomeEmail
+    )(request)
   }
 
   override def updateInfo(request: UpdateInfoRequest): Task[UpdateInfoResponse] = {
-    UpdateInfoEndpoint.handle(UserContextServerInterceptor.ensureAuthenticated, userRepository.updateUser)(request)
+    UpdateInfoEndpoint.handle(
+      UserContextServerInterceptor.ensureAuthenticated,
+      userRepository.updateUser
+    )(request)
   }
 
   override def updateEmail(request: UpdateEmailRequest): Task[UpdateEmailResponse] = ???

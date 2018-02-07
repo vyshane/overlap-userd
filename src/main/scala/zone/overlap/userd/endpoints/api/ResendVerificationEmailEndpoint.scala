@@ -14,10 +14,11 @@ import zone.overlap.userd.validation.RequestValidator._
 
 object ResendVerificationEmailEndpoint extends TaskScheduling {
 
-  def handle(findUserByEmail: Email => Task[Option[UserRecord]],
-             verificationCodeUpdater: (Email, String) => Task[Unit],
-             sendWelcomeEmail: SendWelcomeEmailRequest => Task[SendWelcomeEmailResponse])
-            (request: ResendVerificationEmailRequest): Task[ResendVerificationEmailResponse] = {
+  def handle(
+      findUserByEmail: Email => Task[Option[UserRecord]],
+      verificationCodeUpdater: (Email, String) => Task[Unit],
+      sendWelcomeEmail: SendWelcomeEmailRequest => Task[SendWelcomeEmailResponse]
+  )(request: ResendVerificationEmailRequest): Task[ResendVerificationEmailResponse] = {
     for {
       _ <- ensureValid(validateResendVerificationEmailRequest)(request)
       user <- ensureUserExists(findUserByEmail)(request.email)
@@ -29,7 +30,9 @@ object ResendVerificationEmailEndpoint extends TaskScheduling {
   }
 
   private[api] def ensureUserExists(findUserByEmail: Email => Task[Option[UserRecord]])(email: Email): Task[UserRecord] = {
-    findUserByEmail(email).executeOn(ioScheduler).asyncBoundary
+    findUserByEmail(email)
+      .executeOn(ioScheduler)
+      .asyncBoundary
       .flatMap { user =>
         user
           .map(Task.now(_))
@@ -45,9 +48,9 @@ object ResendVerificationEmailEndpoint extends TaskScheduling {
       Task.now(user)
   }
 
-  private[api] def assignEmailVerificationCodeIfNecessary(codeGenerator: () => String,
-                                                          updateCode: (Email, String) => Task[Unit])
-                                                         (user: UserRecord): Task[String] = {
+  private[api] def assignEmailVerificationCodeIfNecessary(
+      codeGenerator: () => String,
+      updateCode: (Email, String) => Task[Unit])(user: UserRecord): Task[String] = {
     user.emailVerificationCode
       .map(Task.now(_))
       .getOrElse {

@@ -18,9 +18,11 @@ object VerifyEmailEndpoint extends TaskScheduling {
   /*
    * Mark user email as having been verified and register user with Dex
    */
-  def handle(findUserByEmailVerificationCode: String => Task[Option[UserRecord]],
-             registerUserWithDex: CreatePasswordReq => Task[CreatePasswordResp],
-             activateUser: (String) => Task[Unit])(request: VerifyEmailRequest): Task[VerifyEmailResponse] = {
+  def handle(
+      findUserByEmailVerificationCode: String => Task[Option[UserRecord]],
+      registerUserWithDex: CreatePasswordReq => Task[CreatePasswordResp],
+      activateUser: (String) => Task[Unit]
+  )(request: VerifyEmailRequest): Task[VerifyEmailResponse] = {
     for {
       possibleUser <- findUserByEmailVerificationCode(request.verificationCode).executeOn(ioScheduler).asyncBoundary
       user <- ensureUserExists(possibleUser)

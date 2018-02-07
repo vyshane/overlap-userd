@@ -10,8 +10,10 @@ import zone.overlap.userd.validation.RequestValidator._
 
 object UpdateInfoEndpoint extends TaskScheduling {
 
-  def handle(ensureAuthenticated: () => Task[UserContext], updateUser: (String, UpdateInfoRequest) => Task[Unit])
-            (request: UpdateInfoRequest): Task[UpdateInfoResponse] = {
+  def handle(
+      ensureAuthenticated: () => Task[UserContext],
+      updateUser: (String, UpdateInfoRequest) => Task[Unit]
+  )(request: UpdateInfoRequest): Task[UpdateInfoResponse] = {
     for {
       userContext <- ensureAuthenticated()
       validRequest <- ensureValid(validateUpdateUserInfoRequest)(request)

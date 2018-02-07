@@ -14,11 +14,12 @@ import zone.overlap.userd.validation.RequestValidator._
 
 object SignUpEndpoint extends TaskScheduling {
 
-  def handle(findUserByEmail: String => Task[Option[UserRecord]],
-             createUser: SignUpRequest => Task[String],
-             notifyUserSignedUp: UserSignedUp => Task[Unit],
-             clock: Clock)
-            (request: SignUpRequest): Task[SignUpResponse] = {
+  def handle(
+      findUserByEmail: String => Task[Option[UserRecord]],
+      createUser: SignUpRequest => Task[String],
+      notifyUserSignedUp: UserSignedUp => Task[Unit],
+      clock: Clock
+  )(request: SignUpRequest): Task[SignUpResponse] = {
     for {
       existingUser <- findUserByEmail(request.email).executeOn(ioScheduler).asyncBoundary
       _ <- ensureValid(validateSignUpRequest(_ => existingUser.isDefined))(request)
