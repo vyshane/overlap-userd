@@ -5,6 +5,7 @@ package zone.overlap.userd.monitoring
 import java.util.List
 import java.util.ArrayList
 import java.util.Collections
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.{ExecutorService, Executors}
 
 import fi.iki.elonen.NanoHTTPD
@@ -18,7 +19,7 @@ import zone.overlap.userd.monitoring.StatusServer.HealthChecker
 class StatusServer(val port: Int, var healthChecker: HealthChecker = () => true) extends NanoHTTPD(port) {
 
   private val log = LoggerFactory.getLogger(this.getClass)
-  var isReady = false
+  val isReady = new AtomicBoolean(false)
 
   def startAndIndicateNotReady() = {
     setAsyncRunner(BoundRunner(Executors.newFixedThreadPool(2)))
@@ -27,7 +28,7 @@ class StatusServer(val port: Int, var healthChecker: HealthChecker = () => true)
     this
   }
 
-  def indicateReady() = isReady = true
+  def indicateReady() = isReady.set(true)
 
   override def serve(session: NanoHTTPD.IHTTPSession): Response = {
     session.getUri match {
@@ -43,7 +44,7 @@ class StatusServer(val port: Int, var healthChecker: HealthChecker = () => true)
   }
 
   private def serveReadiness(): Response = {
-    if (isReady) respond(Response.Status.OK, "Ready")
+    if (isReady.get()) respond(Response.Status.OK, "Ready")
     else respond(Response.Status.SERVICE_UNAVAILABLE, "Not Ready")
   }
 
