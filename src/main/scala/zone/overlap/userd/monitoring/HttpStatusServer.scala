@@ -11,12 +11,12 @@ import java.util.concurrent.{ExecutorService, Executors}
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.NanoHTTPD.Response
 import org.slf4j.LoggerFactory
-import zone.overlap.userd.monitoring.StatusServer.HealthChecker
+import zone.overlap.userd.monitoring.HttpStatusServer.HealthChecker
 
 /*
  * Serves application health and readiness status over HTTP
  */
-class StatusServer(val port: Int, var healthChecker: HealthChecker = () => true) extends NanoHTTPD(port) {
+class HttpStatusServer(val port: Int, var healthChecker: HealthChecker = () => true) extends NanoHTTPD(port) {
 
   private val log = LoggerFactory.getLogger(this.getClass)
   val isReady = new AtomicBoolean(false)
@@ -24,11 +24,15 @@ class StatusServer(val port: Int, var healthChecker: HealthChecker = () => true)
   def startAndIndicateNotReady() = {
     setAsyncRunner(BoundRunner(Executors.newFixedThreadPool(2)))
     start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
-    log.info(s"Serving status via HTTP on port $port at /health and /readiness")
+    log.info(s"Serving health status on port $port at /health")
+    log.info(s"Serving readiness status on port $port at /readiness")
     this
   }
 
-  def indicateReady() = isReady.set(true)
+  def indicateReady() = {
+    log.info(s"Serving status Ready")
+    isReady.set(true)
+  }
 
   override def serve(session: NanoHTTPD.IHTTPSession): Response = {
     session.getUri match {
@@ -57,10 +61,10 @@ class StatusServer(val port: Int, var healthChecker: HealthChecker = () => true)
   }
 }
 
-object StatusServer {
+object HttpStatusServer {
   type HealthChecker = () => Boolean
 
-  def apply(port: Int) = new StatusServer(port)
+  def apply(port: Int) = new HttpStatusServer(port)
 }
 
 /*

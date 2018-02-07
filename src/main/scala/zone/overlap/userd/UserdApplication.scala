@@ -17,7 +17,7 @@ import zone.overlap.userd.persistence._
 import zone.overlap.userd.authentication.UserContextServerInterceptor
 import zone.overlap.userd.endpoints.api.PublicUserService
 import zone.overlap.userd.endpoints.privateapi.PrivateUserService
-import zone.overlap.userd.monitoring.StatusServer
+import zone.overlap.userd.monitoring.HttpStatusServer
 
 import scala.util.Try
 
@@ -32,7 +32,7 @@ object UserdApplication {
     val config = ConfigFactory.load()
 
     // Start status HTTP endpoints
-    val statusServer = StatusServer(config.getInt("status.port")).startAndIndicateNotReady()
+    val statusServer = HttpStatusServer(config.getInt("status.port")).startAndIndicateNotReady()
     statusServer.healthChecker = () => {
       Try(userRepository.canQueryUsers() && eventPublisher.canQueryTopicPartitions())
         .getOrElse(false)

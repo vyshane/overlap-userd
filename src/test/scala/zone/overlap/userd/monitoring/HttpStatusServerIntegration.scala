@@ -5,12 +5,12 @@ package zone.overlap.userd.monitoring
 import org.jsoup.{Connection, HttpStatusException, Jsoup}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 
-class StatusServerIntegration extends WordSpec with Matchers with BeforeAndAfterAll {
+class HttpStatusServerIntegration extends WordSpec with Matchers with BeforeAndAfterAll {
 
   val port = 3041
   val healthEndpoint = s"http://127.0.0.1:$port/health"
   val readinessEndpoint = s"http://127.0.0.1:$port/readiness"
-  val statusServer = StatusServer(port).startAndIndicateNotReady()
+  val statusServer = HttpStatusServer(port).startAndIndicateNotReady()
 
   override def afterAll() = {
     statusServer.stop()
