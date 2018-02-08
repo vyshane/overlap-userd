@@ -22,6 +22,7 @@ scalacOptions += "-Ypartial-unification" // Required by Typelevel Cats
 // Dependencies
 resolvers += Resolver.bintrayRepo("beyondthelines", "maven")
 resolvers += Resolver.bintrayRepo("cakesolutions", "maven")
+resolvers += Resolver.bintrayRepo("vyshane", "maven")
 
 libraryDependencies ++= Seq(
   // Configuration
@@ -59,7 +60,7 @@ libraryDependencies ++= Seq(
   "io.prometheus" % "simpleclient" % "0.1.0",
   "io.prometheus" % "simpleclient_httpserver" % "0.1.0",
 //  "io.prometheus" % "simpleclient_pushgateway" % "0.1.0",
-  "org.nanohttpd" % "nanohttpd" % "2.3.1",
+  "mu.node" %% "healthttpd" % "0.1.0",
 
   // Logging
   "org.slf4j" % "slf4j-api" % "1.7.25",

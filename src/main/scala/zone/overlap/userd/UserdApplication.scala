@@ -8,6 +8,7 @@ import io.getquill.{PostgresJdbcContext, SnakeCase}
 import io.grpc.netty.NettyServerBuilder
 import io.grpc.{ManagedChannelBuilder, ServerInterceptors}
 import io.prometheus.client.exporter.HTTPServer
+import mu.node.healthttpd.Healthttpd
 import org.slf4j.LoggerFactory
 import zone.overlap.api.UserGrpcMonix
 import zone.overlap.internalapi.EmailDeliveryGrpcMonix
@@ -17,7 +18,6 @@ import zone.overlap.userd.persistence._
 import zone.overlap.userd.authentication.UserContextServerInterceptor
 import zone.overlap.userd.endpoints.api.PublicUserService
 import zone.overlap.userd.endpoints.privateapi.PrivateUserService
-import zone.overlap.userd.monitoring.HttpStatusServer
 
 import scala.util.Try
 
@@ -32,11 +32,12 @@ object UserdApplication {
     val config = ConfigFactory.load()
 
     // Start status HTTP endpoints
-    val statusServer = HttpStatusServer(config.getInt("status.port")).startAndIndicateNotReady()
-    statusServer.healthChecker = () => {
-      Try(userRepository.canQueryUsers() && eventPublisher.canQueryTopicPartitions())
-        .getOrElse(false)
-    }
+    lazy val healthttpd = Healthttpd(config.getInt("status.port"))
+      .setHealthCheck(() => {
+        Try(userRepository.canQueryUsers() && eventPublisher.canQueryTopicPartitions())
+          .getOrElse(false)
+      })
+      .startAndIndicateNotReady()
 
     // Start serving Prometheus metrics via HTTP
     new HTTPServer(config.getInt("metrics.port"))
@@ -90,8 +91,13 @@ object UserdApplication {
       .start()
 
     // gRPC server is up and we are ready to serve requests
-    statusServer.indicateReady()
+    healthttpd.indicateReady()
 
     grpcServer.awaitTermination()
+
+    sys.ShutdownHookThread {
+      grpcServer.shutdown()
+      healthttpd.stop()
+    }
   }
 }
