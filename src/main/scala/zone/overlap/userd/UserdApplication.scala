@@ -32,12 +32,7 @@ object UserdApplication {
     val config = ConfigFactory.load()
 
     // Start status HTTP endpoints
-    lazy val healthttpd = Healthttpd(config.getInt("status.port"))
-      .setHealthCheck(() => {
-        Try(userRepository.canQueryUsers() && eventPublisher.canQueryTopicPartitions())
-          .getOrElse(false)
-      })
-      .startAndIndicateNotReady()
+    val healthttpd = Healthttpd(config.getInt("status.port")).startAndIndicateNotReady()
 
     // Start serving Prometheus metrics via HTTP
     new HTTPServer(config.getInt("metrics.port"))
@@ -90,8 +85,13 @@ object UserdApplication {
       .build()
       .start()
 
-    // gRPC server is up and we are ready to serve requests
-    healthttpd.indicateReady()
+    // userd is up and we are ready to serve requests
+    healthttpd
+      .setHealthCheck(() => {
+        Try(userRepository.canQueryUsers() && eventPublisher.canQueryTopicPartitions())
+          .getOrElse(false)
+      })
+      .indicateReady()
 
     grpcServer.awaitTermination()
 
