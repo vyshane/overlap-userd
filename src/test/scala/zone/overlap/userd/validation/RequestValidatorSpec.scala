@@ -8,10 +8,13 @@ import cats.data.Validated.Invalid
 import cats.implicits._
 import com.github.javafaker.Faker
 import io.grpc.{Status, StatusRuntimeException}
+import monix.eval.Task
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
 import zone.overlap.api.{ResendVerificationEmailRequest, SignUpRequest, UpdateInfoRequest}
 import zone.overlap.privateapi.FindUserByIdRequest
 import zone.overlap.userd.validation.RequestValidator._
+import zone.overlap.TestUtils._
+import zone.overlap.userd.persistence.UserRecord
 
 class RequestValidatorSpec extends AsyncWordSpec with Matchers with RecoverMethods {
 
@@ -22,6 +25,22 @@ class RequestValidatorSpec extends AsyncWordSpec with Matchers with RecoverMetho
 
   // Unit tests
   "RequestValidator" should provide {
+    "an ensureExists function" which {
+      "raises a Task error if none exists" in {
+        recoverToExceptionIf[StatusRuntimeException] {
+          ensureExists[String, UserRecord](_ => Task(None))("").runAsync
+        } map { error =>
+          error.getStatus.getCode shouldEqual Status.NOT_FOUND.getCode
+          error.getMessage.contains("User record not found") shouldBe true
+        }
+      }
+      "returns the value wrapped in a Task if it exists" in {
+        val user = randomVerifiedUserRecord()
+        ensureExists[String, UserRecord](_ => Task(Some(user)))("").runAsync map { u =>
+          u shouldEqual user
+        }
+      }
+    }
     "an ensureValid function" which {
       "raises a Task error if validation fails" in {
         recoverToExceptionIf[StatusRuntimeException] {

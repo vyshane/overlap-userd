@@ -7,12 +7,24 @@ import cats.data.ValidatedNel
 import cats.implicits._
 import io.grpc.Status
 import monix.eval.Task
+import scala.reflect.runtime.universe.{typeOf, TypeTag}
 import zone.overlap.api.{DeleteAccountRequest, ResendVerificationEmailRequest, SignUpRequest, UpdateInfoRequest}
 import zone.overlap.privateapi.FindUserByIdRequest
 
 sealed trait RequestValidator {
 
   type ValidationResult[A] = ValidatedNel[UserValidation, A]
+
+  def ensureExists[A, B: TypeTag](find: A => Task[Option[B]])(a: A): Task[B] = {
+    find(a)
+      .flatMap { b =>
+        b.map(Task.now(_))
+          .getOrElse {
+            val errorMessage = s"${typeName[B].capitalize} not found"
+            Task.raiseError(Status.NOT_FOUND.augmentDescription(errorMessage).asRuntimeException())
+          }
+      }
+  }
 
   def ensureValid[A](validator: A => ValidationResult[A])(value: A): Task[A] =
     validator(value) match {
@@ -77,6 +89,12 @@ sealed trait RequestValidator {
   private[validation] def validatePassword(password: String): ValidationResult[String] =
     if (password.length >= 6) password.validNel
     else PasswordIsTooShort.invalidNel
+
+  private def typeName[T: TypeTag]: String = {
+    typeOf[T].typeSymbol.name.toString
+      .replaceAll("(\\p{Ll})(\\p{Lu})", "$1 $2")
+      .toLowerCase
+  }
 }
 
 object RequestValidator extends RequestValidator

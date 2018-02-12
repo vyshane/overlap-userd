@@ -23,23 +23,6 @@ class ResendVerificationEmailEndpointSpec extends AsyncWordSpec with AsyncMockFa
 
   // Unit tests
   "The resendVerificationEmail public endpoint" should provide {
-    "an ensureUserExists method" which {
-      "raises an error if the user does not exist" in {
-        recoverToExceptionIf[StatusRuntimeException] {
-          ensureUserExists(_ => Task.now(None))(faker.internet().emailAddress()).runAsync
-        } map { error =>
-          error.getStatus.getCode shouldEqual Status.NOT_FOUND.getCode
-        }
-      }
-    }
-    "an ensureUserExists method" which {
-      "provides the user record if the user exists" in {
-        val user = randomPendingUserRecord()
-        ensureUserExists(_ => Task.now(Some(user)))(faker.internet().emailAddress()).runAsync map { u =>
-          u shouldEqual user
-        }
-      }
-    }
     "an ensurePendingEmailVerification method" which {
       "raises an error if the user is not pending email verification" in {
         recoverToExceptionIf[StatusRuntimeException] {

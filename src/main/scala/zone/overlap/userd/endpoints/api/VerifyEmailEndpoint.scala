@@ -25,7 +25,7 @@ object VerifyEmailEndpoint extends TaskScheduling {
   )(request: VerifyEmailRequest): Task[VerifyEmailResponse] = {
     for {
       possibleUser <- findUserByEmailVerificationCode(request.verificationCode).executeOn(ioScheduler).asyncBoundary
-      user <- ensureUserExists(possibleUser)
+      user <- ensureUserFound(possibleUser)
       createPasswordReq = buildCreatePasswordReq(user.id, displayName(user), user.email, user.passwordHash)
       createPasswordResp <- registerUserWithDex(createPasswordReq).executeOn(ioScheduler).asyncBoundary
       _ <- ensureDexUserCreated(createPasswordResp)
@@ -33,7 +33,7 @@ object VerifyEmailEndpoint extends TaskScheduling {
     } yield VerifyEmailResponse()
   }
 
-  private[api] def ensureUserExists(user: Option[UserRecord]): Task[UserRecord] = {
+  private[api] def ensureUserFound(user: Option[UserRecord]): Task[UserRecord] = {
     user
       .map(Task.now(_))
       .getOrElse {

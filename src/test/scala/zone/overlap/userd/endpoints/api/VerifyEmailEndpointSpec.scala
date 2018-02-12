@@ -28,7 +28,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
     "an ensureUserExists method" which {
       "raises an error if the user does not exist" in {
         recoverToExceptionIf[StatusRuntimeException] {
-          ensureUserExists(None).runAsync
+          ensureUserFound(None).runAsync
         } map { error =>
           error.getStatus.getCode shouldEqual Status.INVALID_ARGUMENT.getCode
           error.getMessage.contains("Invalid email verification code") shouldBe true
@@ -37,7 +37,7 @@ class VerifyEmailEndpointSpec extends AsyncWordSpec with AsyncMockFactory with M
     }
     "passes the UserRecord through if the user exists " in {
       val user = randomPendingUserRecord()
-      ensureUserExists(Option(user)).runAsync map { u =>
+      ensureUserFound(Option(user)).runAsync map { u =>
         u shouldEqual user
       }
     }

@@ -29,24 +29,13 @@ object DeleteAccountEndpoint extends TaskScheduling {
     for {
       userContext <- ensureAuthenticated()
       _ <- ensureValid(validateDeleteAccountRequest)(request)
-      user <- ensureUserExists(findUserByEmail)(userContext.email)
+      user <- ensureExists(findUserByEmail)(userContext.email).executeOn(ioScheduler).asyncBoundary
       _ <- ensureValidCredentials(request, user)
       response <- deleteUser(userContext.email).executeOn(ioScheduler)
       _ <- unregisterFromDex(DeletePasswordReq(request.email))
       event = buildAccountDeletedEvent(clock)(user)
       _ <- notifyAccountDeleted(event).asyncBoundary
     } yield DeleteAccountResponse()
-  }
-
-  private[api] def ensureUserExists(findUserByEmail: Email => Task[Option[UserRecord]])(email: Email): Task[UserRecord] = {
-    findUserByEmail(email)
-      .executeOn(ioScheduler)
-      .asyncBoundary
-      .flatMap { user =>
-        user
-          .map(Task.now(_))
-          .getOrElse(Task.raiseError(Status.NOT_FOUND.augmentDescription("User account not found").asRuntimeException()))
-      }
   }
 
   private[api] def ensureValidCredentials(request: DeleteAccountRequest, user: UserRecord): Task[UserRecord] = {

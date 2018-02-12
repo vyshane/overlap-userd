@@ -21,23 +21,12 @@ object ResendVerificationEmailEndpoint extends TaskScheduling {
   )(request: ResendVerificationEmailRequest): Task[ResendVerificationEmailResponse] = {
     for {
       _ <- ensureValid(validateResendVerificationEmailRequest)(request)
-      user <- ensureUserExists(findUserByEmail)(request.email)
+      user <- ensureExists(findUserByEmail)(request.email).executeOn(ioScheduler).asyncBoundary
       _ <- ensurePendingEmailVerification(user)
       currentCode <- assignEmailVerificationCodeIfNecessary(randomUniqueCode, verificationCodeUpdater)(user)
       sendEmailRequest = buildSendWelcomEmailRequest(user, currentCode)
       _ <- sendWelcomeEmail(sendEmailRequest).executeOn(ioScheduler).asyncBoundary
     } yield ResendVerificationEmailResponse()
-  }
-
-  private[api] def ensureUserExists(findUserByEmail: Email => Task[Option[UserRecord]])(email: Email): Task[UserRecord] = {
-    findUserByEmail(email)
-      .executeOn(ioScheduler)
-      .asyncBoundary
-      .flatMap { user =>
-        user
-          .map(Task.now(_))
-          .getOrElse(Task.raiseError(Status.NOT_FOUND.augmentDescription("Email not found").asRuntimeException()))
-      }
   }
 
   private[api] def ensurePendingEmailVerification(user: UserRecord): Task[UserRecord] = {
