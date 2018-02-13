@@ -3,6 +3,7 @@
 package zone.overlap.userd
 
 import com.coreos.dex.api.ApiGrpcMonix
+import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet
 import com.typesafe.config.ConfigFactory
 import io.getquill.{PostgresJdbcContext, SnakeCase}
 import io.grpc.netty.NettyServerBuilder
@@ -15,7 +16,7 @@ import zone.overlap.internalapi.EmailDeliveryGrpcMonix
 import zone.overlap.privateapi.{UserGrpcMonix => PrivateUserGrpcMonix}
 import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence._
-import zone.overlap.userd.authentication.UserContextServerInterceptor
+import zone.overlap.userd.authentication.{UserContext, UserContextServerInterceptor}
 import zone.overlap.userd.endpoints.api.PublicUserService
 import zone.overlap.userd.endpoints.privateapi.PrivateUserService
 
@@ -49,7 +50,7 @@ object UserdApplication {
     lazy val eventPublisher = EventPublisher(config)
 
     // User authentication
-    lazy val userContextServerInterceptor = UserContextServerInterceptor(config)
+    lazy val userContextServerInterceptor = UserContextServerInterceptor(config, UserContext.apply)
 
     // Public user service
     lazy val dexStub = {

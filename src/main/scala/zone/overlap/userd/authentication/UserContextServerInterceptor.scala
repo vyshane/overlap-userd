@@ -9,10 +9,12 @@ import com.google.common.collect.Iterables
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jwt.JWTParser
 import com.nimbusds.oauth2.sdk.id.{ClientID, Issuer}
+import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator
 import com.typesafe.config.Config
 import io.grpc._
 import monix.eval.Task
+import zone.overlap.userd.authentication.UserContextServerInterceptor.UserContextDecoder
 
 import scala.util.Try
 
@@ -27,7 +29,7 @@ import scala.util.Try
  * The public key used to verify the JWT is provided by a JWKS endpoint configured at
  * oicd.jwkstUrl. The key is downloaded and cached.
  */
-case class UserContextServerInterceptor(config: Config) extends ServerInterceptor {
+case class UserContextServerInterceptor[A](config: Config, decoder: IDTokenClaimsSet => A) extends ServerInterceptor {
 
   private val validator = {
     val issuer = new Issuer(config.getString("oidc.issuer"))
@@ -45,7 +47,7 @@ case class UserContextServerInterceptor(config: Config) extends ServerIntercepto
     } map { userContext =>
       val withUserContext = Context
         .current()
-        .withValue[UserContext](UserContextServerInterceptor.userContextKey, userContext)
+        .withValue(UserContextServerInterceptor.userContextKey, userContext)
       Contexts.interceptCall(withUserContext, call, headers, next)
     } getOrElse {
       next.startCall(call, headers)
@@ -64,9 +66,9 @@ case class UserContextServerInterceptor(config: Config) extends ServerIntercepto
     }
   }
 
-  private def decodeUserContext(jwt: String): Option[UserContext] = {
+  private def decodeUserContext(jwt: String): Option[A] = {
     Try(validator.validate(JWTParser.parse(jwt), null))
-      .map(claims => UserContext(claims.getStringClaim("email"), claims.getStringClaim("name")))
+      .map(decoder(_))
       .toOption
   }
 
@@ -74,11 +76,12 @@ case class UserContextServerInterceptor(config: Config) extends ServerIntercepto
 }
 
 object UserContextServerInterceptor {
-  val userContextKey: Context.Key[UserContext] = Context.key("user_context")
-  def getUserContext(): Option[UserContext] = Option(userContextKey.get)
 
-  def ensureAuthenticated(): Task[UserContext] = {
-    getUserContext()
+  val userContextKey: Context.Key[Any] = Context.key("user_context")
+  def getUserContext[A](): Option[A] = Option[A](userContextKey.get.asInstanceOf[A])
+
+  def ensureAuthenticated[A](): Task[A] = {
+    getUserContext[A]()
       .map(Task(_))
       .getOrElse(Task.raiseError(Status.UNAUTHENTICATED.asRuntimeException()))
   }
