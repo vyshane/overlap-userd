@@ -14,7 +14,6 @@ import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator
 import com.typesafe.config.Config
 import io.grpc._
 import monix.eval.Task
-import zone.overlap.userd.authentication.UserContextServerInterceptor.UserContextDecoder
 
 import scala.util.Try
 
