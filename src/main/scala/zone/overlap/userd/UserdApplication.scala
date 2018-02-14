@@ -3,10 +3,9 @@
 package zone.overlap.userd
 
 import com.coreos.dex.api.ApiGrpcMonix
-import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet
 import com.typesafe.config.ConfigFactory
 import io.getquill.{PostgresJdbcContext, SnakeCase}
-import io.grpc.netty.NettyServerBuilder
+import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
 import io.grpc.{ManagedChannelBuilder, ServerInterceptors}
 import io.prometheus.client.exporter.HTTPServer
 import mu.node.healthttpd.Healthttpd

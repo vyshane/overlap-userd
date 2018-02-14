@@ -35,8 +35,8 @@ libraryDependencies ++= Seq(
   "io.monix" %% "monix" % "2.3.3",
 
   // gRPC and Protocol Buffers
-  "io.grpc" % "grpc-netty" % "1.8.0",
-  "io.grpc" % "grpc-stub" % "1.8.0",
+  "io.grpc" % "grpc-netty-shaded" % "1.9.1",
+  "io.grpc" % "grpc-stub" % "1.9.1",
   "com.trueaccord.scalapb" %% "scalapb-runtime-grpc" % "0.6.7",
   "com.trueaccord.scalapb" %% "scalapb-runtime" % "0.6.7" % "protobuf",
   "beyondthelines" %% "grpcmonixruntime" % "0.0.6",
