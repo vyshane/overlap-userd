@@ -71,7 +71,6 @@ libraryDependencies ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
   "org.scalatest" %% "scalatest" % "3.0.4" % Test,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % Test,
-//  "com.whisk" %% "docker-testkit-scalatest" % "0.9.5" % Test,
   "com.whisk" %% "docker-testkit-scalatest" % "0.10.0-beta4" % Test,
   "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.6" % Test,
   "org.jsoup" % "jsoup" % "1.11.2" % Test,
