@@ -8,7 +8,7 @@ import monix.eval.Task
 import org.scalamock.scalatest.AsyncMockFactory
 import org.scalatest.{AsyncWordSpec, Matchers, RecoverMethods}
 import zone.overlap.api.{UpdateInfoRequest, UpdateInfoResponse}
-import zone.overlap.userd.authentication.UserContext
+import zone.overlap.userd.authentication.AuthenticationContext
 
 class UpdateInfoEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Matchers with RecoverMethods {
 
@@ -34,7 +34,7 @@ class UpdateInfoEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Ma
     }
     "sent an invalid request" should {
       "raise an error containing the validation errors and not update the user info" in {
-        val ensureAuthenticated = mockFunction[Task[UserContext]]
+        val ensureAuthenticated = mockFunction[Task[AuthenticationContext]]
         ensureAuthenticated.expects().returning(Task.now(randomUserContext()))
         val updateUser = mockFunction[String, UpdateInfoRequest, Task[Unit]]
         updateUser.expects(*, *).never()
@@ -74,10 +74,10 @@ class UpdateInfoEndpointSpec extends AsyncWordSpec with AsyncMockFactory with Ma
     }
   }
 
-  private def randomUserContext(): UserContext = {
+  private def randomUserContext(): AuthenticationContext = {
     val firstName = faker.name().firstName()
     val lastName = faker.name().firstName()
     val email = faker.internet().emailAddress(firstName)
-    UserContext(email, s"$firstName $lastName")
+    AuthenticationContext(email, s"$firstName $lastName")
   }
 }

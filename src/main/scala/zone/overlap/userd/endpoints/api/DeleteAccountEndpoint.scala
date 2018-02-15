@@ -10,7 +10,7 @@ import io.grpc.Status
 import monix.eval.Task
 import zone.overlap.api.{DeleteAccountRequest, DeleteAccountResponse}
 import zone.overlap.internalapi.events.AccountDeleted
-import zone.overlap.userd.authentication.UserContext
+import zone.overlap.userd.authentication.AuthenticationContext
 import zone.overlap.userd.endpoints.TaskScheduling
 import zone.overlap.userd.persistence.{Email, UserRecord}
 import zone.overlap.userd.validation.RequestValidator._
@@ -19,7 +19,7 @@ import zone.overlap.userd.utils._
 object DeleteAccountEndpoint extends TaskScheduling {
 
   def handle(
-      ensureAuthenticated: () => Task[UserContext],
+      ensureAuthenticated: () => Task[AuthenticationContext],
       findUserByEmail: Email => Task[Option[UserRecord]],
       deleteUser: Email => Task[Unit],
       unregisterFromDex: DeletePasswordReq => Task[DeletePasswordResp],

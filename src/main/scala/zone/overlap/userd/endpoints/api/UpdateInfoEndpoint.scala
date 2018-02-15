@@ -4,14 +4,14 @@ package zone.overlap.userd.endpoints.api
 
 import monix.eval.Task
 import zone.overlap.api.{UpdateInfoRequest, UpdateInfoResponse}
-import zone.overlap.userd.authentication.UserContext
+import zone.overlap.userd.authentication.AuthenticationContext
 import zone.overlap.userd.endpoints.TaskScheduling
 import zone.overlap.userd.validation.RequestValidator._
 
 object UpdateInfoEndpoint extends TaskScheduling {
 
   def handle(
-      ensureAuthenticated: () => Task[UserContext],
+      ensureAuthenticated: () => Task[AuthenticationContext],
       updateUser: (String, UpdateInfoRequest) => Task[Unit]
   )(request: UpdateInfoRequest): Task[UpdateInfoResponse] = {
     for {

@@ -8,7 +8,7 @@ import com.coreos.dex.api.ApiGrpcMonix
 import monix.eval.Task
 import zone.overlap.api._
 import zone.overlap.internalapi.EmailDeliveryGrpcMonix.EmailDeliveryServiceStub
-import zone.overlap.userd.authentication.UserContextServerInterceptor
+import zone.overlap.userd.endpoints._
 import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence.UserRepository
 
@@ -45,7 +45,7 @@ class PublicUserService(userRepository: UserRepository[_, _],
 
   override def updateInfo(request: UpdateInfoRequest): Task[UpdateInfoResponse] = {
     UpdateInfoEndpoint.handle(
-      UserContextServerInterceptor.ensureAuthenticated,
+      ensureAuthenticated,
       userRepository.updateUser
     )(request)
   }
@@ -56,7 +56,7 @@ class PublicUserService(userRepository: UserRepository[_, _],
 
   override def deleteAccount(request: DeleteAccountRequest): Task[DeleteAccountResponse] = {
     DeleteAccountEndpoint.handle(
-      UserContextServerInterceptor.ensureAuthenticated,
+      ensureAuthenticated,
       userRepository.findUserByEmail,
       userRepository.deleteUser,
       dexStub.deletePassword,

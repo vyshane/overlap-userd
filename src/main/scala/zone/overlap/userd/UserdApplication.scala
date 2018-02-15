@@ -8,6 +8,7 @@ import io.getquill.{PostgresJdbcContext, SnakeCase}
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
 import io.grpc.{ManagedChannelBuilder, ServerInterceptors}
 import io.prometheus.client.exporter.HTTPServer
+import mu.node.grpc.oidc.IdTokenInterceptor
 import mu.node.healthttpd.Healthttpd
 import org.slf4j.LoggerFactory
 import zone.overlap.api.UserGrpcMonix
@@ -15,7 +16,7 @@ import zone.overlap.internalapi.EmailDeliveryGrpcMonix
 import zone.overlap.privateapi.{UserGrpcMonix => PrivateUserGrpcMonix}
 import zone.overlap.userd.events.EventPublisher
 import zone.overlap.userd.persistence._
-import zone.overlap.userd.authentication.{UserContext, UserContextServerInterceptor}
+import zone.overlap.userd.authentication.AuthenticationContext
 import zone.overlap.userd.endpoints.api.PublicUserService
 import zone.overlap.userd.endpoints.privateapi.PrivateUserService
 
@@ -48,9 +49,6 @@ object UserdApplication {
     // Kafka
     lazy val eventPublisher = EventPublisher(config)
 
-    // User authentication
-    lazy val userContextServerInterceptor = UserContextServerInterceptor(config, UserContext.apply)
-
     // Public user service
     lazy val dexStub = {
       val channel = ManagedChannelBuilder
@@ -78,10 +76,11 @@ object UserdApplication {
     )
 
     // Start gRPC server
+    val idTokenInterceptor = IdTokenInterceptor(AuthenticationContext(_), config)
     val grpcServer = NettyServerBuilder
       .forPort(config.getInt("grpc.port"))
-      .addService(ServerInterceptors.intercept(publicUserService, userContextServerInterceptor))
-      .addService(ServerInterceptors.intercept(privateUserService, userContextServerInterceptor))
+      .addService(ServerInterceptors.intercept(publicUserService, idTokenInterceptor))
+      .addService(ServerInterceptors.intercept(privateUserService, idTokenInterceptor))
       .build()
       .start()
 
