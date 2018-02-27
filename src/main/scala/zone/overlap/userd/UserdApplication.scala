@@ -2,6 +2,8 @@
 
 package zone.overlap.userd
 
+import java.util.concurrent.TimeUnit
+
 import com.coreos.dex.api.ApiGrpcMonix
 import com.typesafe.config.ConfigFactory
 import io.getquill.{PostgresJdbcContext, SnakeCase}
@@ -55,14 +57,14 @@ object UserdApplication {
         .forAddress(config.getString("dex.host"), config.getInt("dex.port"))
         .usePlaintext(true)
         .build()
-      ApiGrpcMonix.stub(channel)
+      ApiGrpcMonix.stub(channel).withDeadlineAfter(5, TimeUnit.SECONDS)
     }
     lazy val emailDeliveryStub = {
       val channel = ManagedChannelBuilder
         .forAddress(config.getString("emaild.host"), config.getInt("emaild.port"))
         .usePlaintext(true)
         .build()
-      EmailDeliveryGrpcMonix.stub(channel)
+      EmailDeliveryGrpcMonix.stub(channel).withDeadlineAfter(5, TimeUnit.SECONDS)
     }
     lazy val publicUserService = UserGrpcMonix.bindService(
       new PublicUserService(userRepository, dexStub, emailDeliveryStub, eventPublisher),
