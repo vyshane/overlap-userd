@@ -1,6 +1,6 @@
 # userd
 
-userd provides Overlap user services.
+User management microservice written in Scala. Provides a gRPC interface.
 
 ## Building
 
